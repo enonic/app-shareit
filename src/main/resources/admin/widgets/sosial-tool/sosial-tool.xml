@@ -1,0 +1,9 @@
+<widget>
+  <display-name>ShareIt</display-name>
+  <interfaces>
+    <interface>com.enonic.xp.content-manager.context-widget</interface>
+  </interfaces>
+  <config>
+    <property name="render-on-resize" value="true" />
+  </config>
+</widget>

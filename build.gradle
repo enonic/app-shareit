@@ -1,0 +1,47 @@
+plugins {
+    id 'com.enonic.xp.app' version '1.0.15'
+    id "com.moowork.node" version "1.2.0"
+}
+
+app {
+    name = project.appName
+    displayName = 'Share-it'
+    vendorName = 'Enonic AS'
+    vendorUrl = 'http://enonic.com'
+    systemVersion = "${xpVersion}"
+}
+
+dependencies {
+    compile "com.enonic.xp:core-api:${xpVersion}"
+    compile "com.enonic.xp:portal-api:${xpVersion}"
+    include "com.enonic.xp:lib-content:${xpVersion}"
+    include "com.enonic.xp:lib-portal:${xpVersion}"
+    include "com.enonic.xp:lib-thymeleaf:${xpVersion}"
+    //include "com.enonic.xp:lib-mustache:${xpVersion}"
+    //include "com.enonic.xp:lib-i18n:${xpVersion}"
+    //include "com.enonic.xp:lib-auth:${xpVersion}"
+    //include "com.enonic.xp:lib-context:${xpVersion}"
+    //include "com.enonic.xp:lib-io:${xpVersion}"
+    //include "com.enonic.xp:lib-mail:${xpVersion}"
+    //include "com.enonic.xp:lib-repo:${xpVersion}"
+    //include "com.enonic.xp:lib-websocket:${xpVersion}"
+}
+
+//logging.captureStandardOutput LogLevel.INFO || Does not set loglevel of node console.log 
+//Creates a main.css file and removes main.scss from build
+task npmSass(type: NodeTask) {
+  script = file('npm/create-sass.js')
+}
+
+/* Cant get the jar not to compile "*.scss" files
+jar {
+    exclude('build/resources/main/assets/styles')
+}*/
+
+jar.dependsOn  npmSass
+
+repositories {
+    mavenLocal()
+    jcenter()
+    xp.enonicRepo()
+}

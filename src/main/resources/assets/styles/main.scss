@@ -1,0 +1,10 @@
+$dark-text: #000;
+$input-border-radius: 3px;
+
+body {
+    color: $dark-text;
+}
+
+input {
+    border-radius: $input-border-radius;
+}
