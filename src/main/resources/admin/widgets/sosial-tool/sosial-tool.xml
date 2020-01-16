@@ -1,9 +1,7 @@
 <widget>
-  <display-name>ShareIt</display-name>
+  <display-name>SocialMessage</display-name>
+  <description>Post a message to different social media</description>
   <interfaces>
-    <interface>com.enonic.xp.content-manager.context-widget</interface>
+    <interface>contentstudio.contextpanel</interface>
   </interfaces>
-  <config>
-    <property name="render-on-resize" value="true" />
-  </config>
 </widget>
