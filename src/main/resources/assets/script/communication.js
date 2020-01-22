@@ -1,69 +1,46 @@
+//Social media 
+//add event listeners to each social media
+selectBox();
 
-//Javascript front-end handles all data trafic.
-//Not a fan of it, but i don't want content studio to reload on every post request.
+//var serviceUrl = $("#AuthService").val();
 
-//#twitter-message
-$(function () {
-    //console.log("rand", genRandomString());
-    //genRandomString(32);
-    //senderTwitter();
+var httpRequest = new XMLHttpRequest();
 
-    var serviceUrl = $("#AuthService").val();
-    console.log(serviceUrl);
+httpRequest.onreadystatechange = function () {
 
-    var httpRequest = new XMLHttpRequest();
+};
 
-    httpRequest.onreadystatechange = function() {
+var serviceUrl = document.getElementById("serviceUrl").data("serviceUrl");
+httpRequest.open('GET', serviceUrl, true);
 
-    };
-    var serviceUrl = document.getElementById("social-widget").data("serviceUrl");
-    httpRequest.open('GET', serviceUrl, true);
-    
 
-    request.fail(function (jqXHR, textStatus, err) {
-        console.log("error: " + textStatus, err);
-        $("#twitter-mesage").addClass("error").html(err);
-    });
-
-    request.done(function (data) {
-        console.log(data);
-        $("#twitter-mesage").addClass("success").html(data);
-    });
-
-    //sending twitter message
+request.fail(function (jqXHR, textStatus, err) {
+    console.log("error: " + textStatus, err);
+    $("#twitter-mesage").addClass("error").html(err);
 });
 
-/*function senderTwitter() {
+request.done(function (data) {
+    console.log(data);
+    $("#twitter-mesage").addClass("success").html(data);
+});
 
-    var authorization = getAuthentication();
+//sending twitter message
 
-    var request = $.ajax({
-        url: "",
-        data: {
-            status: "Human forced me to post a tweet.",
-        },
-        headers: {
-            authorization: authorization,
-        },
-        contentType: "application/json",
-    });
-
-    //
-    
-
-    request.fail(function (err) {
-        console.log("error");
-        $("#twitter-mesage").addClass("error").text(err);
-    });
-
-    request.done(function (data) {
-        $("#twitter-mesage").addClass("success").text(err);
-    });
+function selectBox() {
+    var platforms = document.querySelectorAll(".platform");
+    for (let i = 0; i < platforms.length; i++) {
+        let current = platforms[i];
+        platforms[i].querySelector("input").addEventListener("change", function () {
+            platformEvent(current, this);
+        });
+    }
 }
 
-function getAuthentication() {
-    var authorization = {
-        oauth_consumer_key: "",
-        oauth_nonce: "",
-    };
-}*/
+function platformEvent(platform, target) {
+    if (target.checked) {
+        platform.className += " selected";
+    } else {
+        platform.className = platform.className.replace(" selected", "");
+    }
+    
+}

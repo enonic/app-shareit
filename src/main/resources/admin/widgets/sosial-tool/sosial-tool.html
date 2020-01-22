@@ -1,23 +1,26 @@
-<widget>
+<widget class="shareMain">
     <!--Link in body. Will be changed in future versions of XP. Iframe?-->
     <link data-th-href="${ stylesheet }" rel="stylesheet" type="text/css" />
-    <div class="hidden" id="serviceUrl" data-serviceurl="${serviceUrl}"></div>
-
-
+    <div class="hidden" id="serviceUrl" data-th-attr='data-serviceurl=${serviceUrl}'></div>
 
     <div id="share-it">
         <h1>Select your target platform, and click send</h1>
-        
-        <label>
-            <input type="checkbox" value ="twitter"/>
-            <h2>Twitter message</h2>
-            <p data-th-text="${url}"></p>
-            <p>"Max character limit 280"</p>
-        </label>
-     
-        <div id="twitter-message">Message container</div>
+
+        <div class="platform" tabindex="0">
+            <label class="banner">
+                <input id="twitter" type="checkbox" name="twitter" />
+                <img class="image twitterLogo" data-th-src="${ twitterLogoUrl }" />
+                <h2>Twitter</h2>
+            </label>
+            <div class="detail">
+                <p data-th-text="${url}"></p>
+            </div>
+            <!-- <p>"Max character limit 280"</p> -->
+        </div>
+        <div class="platform" tabindex="0">
+            <input id="other" type="checkbox" />
+        </div>
     </div>
 
-    <script type="text/javascript" data-th-src="${ jquery }"></script>
     <script type="text/javascript" data-th-src="${ communication }"></script>
 </widget>

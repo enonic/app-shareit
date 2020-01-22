@@ -8,37 +8,55 @@ const view = resolve('sosial-tool.html');
 
 exports.get = function (req) {
     let twitterService = portal.serviceUrl({
-        service: "auth",
+        service: "twitterCom",
     });
 
-    let contentId = req.params.contentId;
+    let current = portal.getContent();
 
-    if (!contentId) {
-        let current = portal.getContent();
-        if (current) contentId = current._id;
+    let contentId = req.params.contentId;
+    //Set current if its missing from params
+    if (!contentId && current) {
+        contentId = current._id;
     }
 
-    //content selected in CS
+    //Still missing? Nothing selected
     if (!contentId) {
         return errorMessage("No content selected");
     }
 
-    //Check for config 
+    if (!current) {
+        current = libContent.get({ key: contentId });
+    }
+
+    //content selected in CS
+    let siteConfig = libContent.getSiteConfig({
+        key: contentId,
+        applicationKey: app.name
+    });
+
+    if (!siteConfig.domain) {
+        return errorMessage("App not configured for this site");
+    }
+
+    //Check for config file
     //log.info(JSON.stringify(app.config, null, 4));
     if (app.config) {
         if (app.enable == false) {
-            return errorMessage("App not configured for this site");
+            return errorMessage("Missing configuration file, application not enabled");
         }
     }
 
-    var url;
+    var site = libContent.getSite({ key: contentId });
+    var pathAppend = current._path.replace(site._path, "");
+
+    //prepend siteconfig.domain
+    var url = siteConfig.domain + '' + pathAppend;
+
     var published;
 
     //Check if its published
     context.run({ branch: "master" }, () => {
         published = libContent.exists({ key: contentId });
-        //How does one get live url? //Thomas
-        //url = libContent.get({ contentId });
     });
     if (published == false) {
         return errorMessage("Item not published");

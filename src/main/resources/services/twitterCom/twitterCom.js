@@ -1,11 +1,8 @@
 var request = require('/lib/http-client');
-var encodingLib = require('/lib/text-encoding');
+//var encodingLib = require('/lib/text-encoding');
 
-var counter = 0;
-
+//All communicatio with twitter
 exports.get = function(req) {
-
-  counter++;
 
   log.info("auth service:");
   prettyPrint(req);
@@ -26,7 +23,6 @@ function genRandomString(size) {
   for (var i = 0; i < size; i++) {
       str += alphaNum.charAt(Math.ceil(Math.random() * alphaNum.length));
   }
-  console.log(str);
 }
 
 function prettyPrint(data) {

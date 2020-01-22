@@ -1,39 +1,76 @@
-@dark-text          : #000;
-@input-border-radius: 3px;
-@twitter-blue       : #1da1f2;
+@dark-text : #000;
 
+@input-border-radius: 3px;
+
+@twitter-blue : #1da1f2;
 @import "enonic-admin-artifacts";
 
 //More or less a global namespace
 #share-it {
-  display           : grid;
-  grid-template-rows: 50px repeat(3, 150px);
+  margin: 0px 5% 0px 5%;
+  // display           : grid;
+  // grid-template-rows: 50px repeat(3, 150px);
+  display: inline-block;
 
-  //Should be applied to all sosial boxes
-  & .social-box {
-    display: -ms-grid;
-    display: grid;
+  h1 {
+    margin-bottom: 16px;
+  }
 
-    margin    : 10px;
-    padding   : 5px;
-    box-shadow: 0px 1px 2px 1px lightgray;
+  .platform {
+    padding: 1rem;
+    margin: 0.1rem 0;
 
-    form {
-      width: 100%;
+    &.selected {
+      box-shadow: 0px 0px 10px 1px;
+    }
 
-      textarea {
-        width: 100%;
+    &.selected .detail {
+      max-height: 400px;
+    }
+
+    &:last-of-type {
+      margin-bottom: 10px;
+    }
+
+    .detail {
+      height: auto;
+      margin-top: 1rem;
+      max-height: 0px;
+      overflow: hidden;
+      transition: max-height 0.5s ease-in-out;
+
+      p {
+        padding: 0.5rem 0;
       }
+    }
+
+    .banner {
+      h2 {
+        display: inline-block;
+      }
+    }
+
+    .image {
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    input {
+      -moz-appearance: checkbox;
+      -webkit-appearance: checkbox;
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+    }
+
+    label {
+      font-size: 2rem;
     }
   }
 
-  //Sosial widgets block
-  & .twitter {
-    border: 2.5px solid @twitter-blue;
-
-    .logo {
-      width: 20px;
-    }
+  //Twitter
+  .twitterLogo {
+    width: 50px;
   }
 
   //& .other-social {}

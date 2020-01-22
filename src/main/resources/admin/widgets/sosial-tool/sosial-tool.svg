@@ -1,0 +1,11 @@
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" 
+   xmlns:cc="http://creativecommons.org/ns#" 
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+   xmlns:svg="http://www.w3.org/2000/svg" 
+   xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+   <g transform="translate(0,-197)">
+      <path style="fill:none;fill-opacity:1;stroke:#0864a0;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:normal" d="m 92.577783,208.41965 -48.758256,47.6925 31.591717,20.76152 z m 0,0 -88.4187544,24.33736 25.8493124,15.08222 z" />
+      <path style="fill:none;stroke:#0864a0;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" d="m 30.008341,247.83923 3.712327,32.73203 10.098859,-24.45911 48.758255,-47.6925 z" />
+      <path style="fill:none;stroke:#0864a0;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" d="m 43.819527,256.11215 8.574896,5.77388 -18.673756,18.68523 z" />
+   </g>
+</svg>
