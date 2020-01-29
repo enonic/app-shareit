@@ -18,17 +18,17 @@ var request = httpLib.request;
 **/
 
 //All communicatio with twitter
-exports.get = function (req) {
+exports.post = function (req) {
+    
+    if (req.body && req.body) {
+        let body = JSON.parse(req.body);
+        let response = sendRequest(body.text);
+        return response;
+    }
 
-    // if (req.params.message) {
-    //req.params.message
-    let response = sendRequest("foobar");
-    // }
-
-    // return {
-    //     status: response.status
-    // };
-
+    return {
+        status: 400,
+    };
 };
 
 function sendRequest(message) {
@@ -37,26 +37,23 @@ function sendRequest(message) {
 
     let encodedOath = encodeData(oath);
 
-    //only the  signature uses include_entities
+    //Include all body and query string parameters
     let extraData = [
         ["status", status],
-        ["include_entities", true],
+        //["include_entities", true],
     ];
-
-    //["status", status],
 
     let encodedExtraData = encodeData(extraData);
     let encodedFinal = encodedOath.concat(encodedExtraData);
 
-    //logf(encodedFinal);
-
     let headerData = {
         url: "https://api.twitter.com/1.1/statuses/update.json",
-        method: "post",
+        method: "POST",
         headers: {},
         params: {
-            status: strictEncodeUri(status),
-        }
+            "status": strictEncodeUri(status),
+        }, 
+        //contentType: "application/x-www-form-urlencoded"
     };
 
     let signature = createSignature(encodedFinal, headerData);
@@ -64,20 +61,21 @@ function sendRequest(message) {
 
     let encodedSignature = encodeData(storedSign);
     encodedOath = encodedOath.concat(encodedSignature);
+    encodedOath.sort();
 
-    headerData.headers.authorization = buildAuthorization(encodedOath);
+    headerData.headers.Authorization = buildAuthorization(encodedOath);
 
     logf(headerData);
 
-    /* let response = request(headerData);
+    let response = request(headerData);
 
-    logf(response); */
+    logf(response);
 }
 
 //Initializes all possible oauth values. (signature is created later)
 function createOAuthObject(status) {
-    let random_token = genRandomString(16);
-    let timestamp = Math.round(new Date().getTime() / 1000);
+    let random_token = genRandomString(42);
+    let timestamp = Math.floor(new Date().getTime() / 1000);    
 
     let oath = [
         ["oauth_consumer_key", app.config.twitter_consumer_key],
@@ -130,15 +128,15 @@ function createSignature(encodedParams, header) {
         }
     }
 
-    logf("parameter string");
-    logf(param);
+    // logf("parameter string");
+    // logf(param);
 
     let method = header.method.toUpperCase();
     output = method + '&' + strictEncodeUri(header.url);
     output += '&' + strictEncodeUri(param);
 
-    logf("basestring");
-    logf(output);
+    // logf("basestring");
+    // logf(output);
 
     let signingkey = strictEncodeUri(app.config.twitter_consumer_secret);
     signingkey += '&' + strictEncodeUri(app.config.twitter_user_secret);
@@ -182,7 +180,7 @@ function signing(key, payload) {
     let hexKey = encoding.hexEncode(key);
     let stream = encoding.hmacSha1AsStream(payload, hexKey);
 
-    return encoding.base64Encode(stream);
+    return encoding.base64Encode(stream) + "VALUE";
 }
 
 function strictEncodeUri(str) {
@@ -200,7 +198,7 @@ function strictEncodeUri(str) {
 
 function genRandomString(size) {
     var str = "";
-    var alphaNum = "abcdefghijklmnopqrstuvwxyz0123456789";
+    var alphaNum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     for (var i = 0; i < size; i++) {
         str += alphaNum.charAt(Math.ceil(Math.random() * alphaNum.length));
     }

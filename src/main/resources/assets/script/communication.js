@@ -1,30 +1,35 @@
-//Social media 
-//add event listeners to each social media
+//TODO add event listeners to each social media
 
-
-//var serviceUrl = $("#AuthService").val();
-
-var httpRequest = new XMLHttpRequest();
-
-//run the different section
-//AJAX api request
-connectService();
-//Visual
 selectBox();
+
+var shareButton = document.getElementById("shareButton");
+shareButton.addEventListener("click", function () {
+    connectService();
+});
 
 function connectService() {
     var serviceUrl = document.getElementById("serviceUrl").dataset.serviceurl;
-    httpRequest.open('GET', serviceUrl, true);
-    httpRequest.send();
+    var httpRequest = new XMLHttpRequest();
+    var twitter = document.getElementById("twitter");
 
-    console.log(serviceUrl);
+    httpRequest.addEventListener("load", function (event) {
+        console.log(httpRequest.response);
+        let successMessage = document.createElement("p");
+        successMessage.className = "success";
+        successMessage.innerText = "Posted a new tweet";
+        twitter.append(successMessage);
+    });
+    httpRequest.addEventListener("error", function (event) {
+        console.log(httpRequest.response);
+        let errorMessage = document.createElement("p");
+        errorMessage.className = "error";
+        errorMessage.innerText = "Something went wrong";
+        twitter.append(errorMessage);
+    });
 
-    httpRequest.onreadystatechange = function () {
-        if (httpRequest.readyState == XMLHttpRequest.DONE) {
-            console.log(httpRequest.status);
-            console.log(httpRequest.responseText);
-        }
-    };
+    httpRequest.open('POST', serviceUrl, true);
+    httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    httpRequest.send(JSON.stringify({ text: "foobar" }));
 }
 
 //Open close on selected box (Each of twitter, facebook, social media widgets)

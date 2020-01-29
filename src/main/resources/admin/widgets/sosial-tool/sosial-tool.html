@@ -4,9 +4,9 @@
     <div class="hidden" id="serviceUrl" data-th-attr='data-serviceurl=${serviceUrl}'></div>
 
     <div id="share-it">
-        <h1>Select your target platform, and click send</h1>
+        <h1>Select your target platform and share</h1>
 
-        <div class="platform" tabindex="0">
+        <div class="platform" id="twitter" tabindex="0">
             <label class="banner">
                 <input id="twitter" type="checkbox" name="twitter" />
                 <img class="image twitterLogo" data-th-src="${ twitterLogoUrl }" />
@@ -20,6 +20,9 @@
         <div class="platform" tabindex="0">
             <input id="other" type="checkbox" />
         </div>
+    </div>
+    <div id="shareButton">
+        <p>Share</p>
     </div>
 
     <script type="text/javascript" data-th-src="${ communication }"></script>
