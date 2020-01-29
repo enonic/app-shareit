@@ -9,6 +9,7 @@ const view = resolve('sosial-tool.html');
 exports.get = function (req) {
     let twitterService = portal.serviceUrl({
         service: "twitterCom",
+        type: "absolute"
     });
 
     let current = portal.getContent();
@@ -41,7 +42,7 @@ exports.get = function (req) {
     //Check for config file
     //log.info(JSON.stringify(app.config, null, 4));
     if (app.config) {
-        if (app.enable == false) {
+        if (app.config.enable == "false") {
             return errorMessage("Missing configuration file, application not enabled");
         }
     }

@@ -1,31 +1,33 @@
 //Social media 
 //add event listeners to each social media
-selectBox();
+
 
 //var serviceUrl = $("#AuthService").val();
 
 var httpRequest = new XMLHttpRequest();
 
-httpRequest.onreadystatechange = function () {
+//run the different section
+//AJAX api request
+connectService();
+//Visual
+selectBox();
 
-};
+function connectService() {
+    var serviceUrl = document.getElementById("serviceUrl").dataset.serviceurl;
+    httpRequest.open('GET', serviceUrl, true);
+    httpRequest.send();
 
-var serviceUrl = document.getElementById("serviceUrl").data("serviceUrl");
-httpRequest.open('GET', serviceUrl, true);
+    console.log(serviceUrl);
 
+    httpRequest.onreadystatechange = function () {
+        if (httpRequest.readyState == XMLHttpRequest.DONE) {
+            console.log(httpRequest.status);
+            console.log(httpRequest.responseText);
+        }
+    };
+}
 
-request.fail(function (jqXHR, textStatus, err) {
-    console.log("error: " + textStatus, err);
-    $("#twitter-mesage").addClass("error").html(err);
-});
-
-request.done(function (data) {
-    console.log(data);
-    $("#twitter-mesage").addClass("success").html(data);
-});
-
-//sending twitter message
-
+//Open close on selected box (Each of twitter, facebook, social media widgets)
 function selectBox() {
     var platforms = document.querySelectorAll(".platform");
     for (let i = 0; i < platforms.length; i++) {
@@ -42,5 +44,5 @@ function platformEvent(platform, target) {
     } else {
         platform.className = platform.className.replace(" selected", "");
     }
-    
+
 }

@@ -21,14 +21,14 @@ dependencies {
     include "com.enonic.xp:lib-auth:${xpVersion}"
 
     include "com.enonic.lib:lib-thymeleaf:2.0.0"
+    include "com.enonic.lib:lib-http-client:2.0.0"
+    include 'com.enonic.lib:lib-text-encoding:2.0.0'
+    include 'com.enonic.lib:lib-util:2.0.0'
     //include "com.enonic.xp:lib-i18n:${xpVersion}"
-    
     //include "com.enonic.xp:lib-io:${xpVersion}"
     //include "com.enonic.xp:lib-mail:${xpVersion}"
     //include "com.enonic.xp:lib-repo:${xpVersion}"
     //include "com.enonic.xp:lib-websocket:${xpVersion}"
-
-    include 'com.enonic.lib:lib-text-encoding:2.0.0'
 }
 
 //logging.captureStandardOutput LogLevel.INFO || Does not set loglevel of node console.log 
