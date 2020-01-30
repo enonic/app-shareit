@@ -19,16 +19,17 @@ var request = httpLib.request;
 
 //All communicatio with twitter
 exports.post = function (req) {
-    
+
     if (req.body && req.body) {
         let body = JSON.parse(req.body);
-        let response = sendRequest(body.text);
-        return response;
+        logf(body);
+        if (body.twitter) {
+            let response = sendRequest(body.twitter);
+            return response;
+        }
     }
 
-    return {
-        status: 400,
-    };
+    return "Error, could not send twitter message";
 };
 
 function sendRequest(message) {
@@ -46,14 +47,16 @@ function sendRequest(message) {
     let encodedExtraData = encodeData(extraData);
     let encodedFinal = encodedOath.concat(encodedExtraData);
 
+    //let encodedStatus = strictEncodeUri(status);
+
     let headerData = {
         url: "https://api.twitter.com/1.1/statuses/update.json",
         method: "POST",
         headers: {},
         params: {
-            "status": strictEncodeUri(status),
-        }, 
-        //contentType: "application/x-www-form-urlencoded"
+            status: status
+        },
+        //contentType: "application/json"
     };
 
     let signature = createSignature(encodedFinal, headerData);
@@ -75,7 +78,7 @@ function sendRequest(message) {
 //Initializes all possible oauth values. (signature is created later)
 function createOAuthObject(status) {
     let random_token = genRandomString(42);
-    let timestamp = Math.floor(new Date().getTime() / 1000);    
+    let timestamp = Math.floor(new Date().getTime() / 1000);
 
     let oath = [
         ["oauth_consumer_key", app.config.twitter_consumer_key],
@@ -128,15 +131,15 @@ function createSignature(encodedParams, header) {
         }
     }
 
-    // logf("parameter string");
-    // logf(param);
+    logf("parameter string");
+    logf(param);
 
     let method = header.method.toUpperCase();
     output = method + '&' + strictEncodeUri(header.url);
     output += '&' + strictEncodeUri(param);
 
-    // logf("basestring");
-    // logf(output);
+    logf("basestring");
+    logf(output);
 
     let signingkey = strictEncodeUri(app.config.twitter_consumer_secret);
     signingkey += '&' + strictEncodeUri(app.config.twitter_user_secret);
@@ -180,7 +183,7 @@ function signing(key, payload) {
     let hexKey = encoding.hexEncode(key);
     let stream = encoding.hmacSha1AsStream(payload, hexKey);
 
-    return encoding.base64Encode(stream) + "VALUE";
+    return encoding.base64Encode(stream);
 }
 
 function strictEncodeUri(str) {

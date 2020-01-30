@@ -3,11 +3,37 @@
 selectBox();
 
 var shareButton = document.getElementById("shareButton");
+
 shareButton.addEventListener("click", function () {
-    connectService();
+    let shareUrl = document.getElementById("shareUrl").dataset.shareurl;
+    let platforms = document.querySelectorAll(".platform");
+
+    if (platforms.length > 0 && shareUrl != "") {
+        let model = {};
+        for (let i = 0; i < platforms.length; i++) {
+            assignPlatform(platforms[i], model, shareUrl);
+        }
+        connectService(model);
+    }
 });
 
-function connectService() {
+function assignPlatform(platform, model, message) {
+    let socialMedia = platform.id;
+
+    if (socialMedia) {
+        switch (socialMedia) {
+            case "twitter":
+                model.twitter = message;
+                break;
+            default:
+                console.log("could not find" + socialMedia);
+                break;
+        }
+    }
+    return;
+}
+
+function connectService(dataBody) {
     var serviceUrl = document.getElementById("serviceUrl").dataset.serviceurl;
     var httpRequest = new XMLHttpRequest();
     var twitter = document.getElementById("twitter");
@@ -29,7 +55,7 @@ function connectService() {
 
     httpRequest.open('POST', serviceUrl, true);
     httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    httpRequest.send(JSON.stringify({ text: "foobar" }));
+    httpRequest.send(JSON.stringify(dataBody));
 }
 
 //Open close on selected box (Each of twitter, facebook, social media widgets)

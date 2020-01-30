@@ -2,18 +2,19 @@
     <!--Link in body. Will be changed in future versions of XP. Iframe?-->
     <link data-th-href="${ stylesheet }" rel="stylesheet" type="text/css" />
     <div class="hidden" id="serviceUrl" data-th-attr='data-serviceurl=${serviceUrl}'></div>
+    <div class="hidden" id="shareUrl" data-th-attr='data-shareurl=${url}'></div>
 
     <div id="share-it">
         <h1>Select your target platform and share</h1>
 
         <div class="platform" id="twitter" tabindex="0">
             <label class="banner">
-                <input id="twitter" type="checkbox" name="twitter" />
+                <input type="checkbox" name="twitter" />
                 <img class="image twitterLogo" data-th-src="${ twitterLogoUrl }" />
                 <h2>Twitter</h2>
             </label>
             <div class="detail">
-                <p data-th-text="${url}"></p>
+                <p data-th-attr="data-url=${url}" data-th-text="${url}"></p>
             </div>
             <!-- <p>"Max character limit 280"</p> -->
         </div>
