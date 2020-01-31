@@ -22,7 +22,6 @@ exports.post = function (req) {
 
     if (req.body && req.body) {
         let body = JSON.parse(req.body);
-        logf(body);
         if (body.twitter) {
             let response = sendRequest(body.twitter);
             return response;
@@ -68,15 +67,15 @@ function sendRequest(message) {
 
     headerData.headers.Authorization = buildAuthorization(encodedOath);
 
-    logf(headerData);
+    // logf(headerData);
 
     let response = request(headerData);
 
-    logf(response);
+    // logf(response);
 }
 
 //Initializes all possible oauth values. (signature is created later)
-function createOAuthObject(status) {
+function createOAuthObject() {
     let random_token = genRandomString(42);
     let timestamp = Math.floor(new Date().getTime() / 1000);
 
@@ -131,15 +130,15 @@ function createSignature(encodedParams, header) {
         }
     }
 
-    logf("parameter string");
-    logf(param);
+    // logf("parameter string");
+    // logf(param);
 
     let method = header.method.toUpperCase();
     output = method + '&' + strictEncodeUri(header.url);
     output += '&' + strictEncodeUri(param);
 
-    logf("basestring");
-    logf(output);
+    // logf("basestring");
+    // logf(output);
 
     let signingkey = strictEncodeUri(app.config.twitter_consumer_secret);
     signingkey += '&' + strictEncodeUri(app.config.twitter_user_secret);
@@ -167,8 +166,8 @@ function buildAuthorization(params) {
         }
     }
 
-    logf("Auth header params");
-    logf(output);
+    // logf("Auth header params");
+    // logf(output);
 
     return output;
 }

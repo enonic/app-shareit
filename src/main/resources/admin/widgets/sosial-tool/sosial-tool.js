@@ -29,6 +29,8 @@ exports.get = function (req) {
         current = libContent.get({ key: contentId });
     }
 
+    
+
     //content selected in CS
     let siteConfig = libContent.getSiteConfig({
         key: contentId,
@@ -66,6 +68,7 @@ exports.get = function (req) {
     var model = {
         //content to share/post
         url,
+        name: current.displayName,
 
         //stylesheets
         stylesheet: portal.assetUrl({ path: "styles/main.css" }),

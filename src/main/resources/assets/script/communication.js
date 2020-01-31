@@ -5,13 +5,13 @@ selectBox();
 var shareButton = document.getElementById("shareButton");
 
 shareButton.addEventListener("click", function () {
-    let shareUrl = document.getElementById("shareUrl").dataset.shareurl;
+    let message = document.getElementById("shareUrl").dataset.message;
     let platforms = document.querySelectorAll(".platform");
 
     if (platforms.length > 0 && shareUrl != "") {
         let model = {};
         for (let i = 0; i < platforms.length; i++) {
-            assignPlatform(platforms[i], model, shareUrl);
+            assignPlatform(platforms[i], model, message);
         }
         connectService(model);
     }
