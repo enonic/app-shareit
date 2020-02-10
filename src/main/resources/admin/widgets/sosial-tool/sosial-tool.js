@@ -7,6 +7,7 @@ const libContent = require('/lib/xp/content');
 const view = resolve('sosial-tool.html');
 
 exports.get = function (req) {
+
     let twitterService = portal.serviceUrl({
         service: "twitterCom",
         type: "absolute"
@@ -28,8 +29,6 @@ exports.get = function (req) {
     if (!current) {
         current = libContent.get({ key: contentId });
     }
-
-    
 
     //content selected in CS
     let siteConfig = libContent.getSiteConfig({

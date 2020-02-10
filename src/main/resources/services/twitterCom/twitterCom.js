@@ -5,18 +5,6 @@ var encoding = require('/lib/text-encoding');
 var logf = util.log;
 var request = httpLib.request;
 
-/**
- * The 7 keys of oath:
- *1 oath_consumer_key: //Get from config file. Application consumer key
- *2 oauth_once: unique token each time use genRandomSting
- *3 oath_signature: See creating signature
- *3 -
- *4 oauth_signature_method: HMAC-SHA1 (twitter uses this)
- *5 oauth_timestamp: number of seconds since unix epoch at request generation
- *6 oauth_token: //get from config file . UserAcces to application 
- *7 oauth_version: 1.0 (Twitter)
-**/
-
 //All communicatio with twitter
 exports.post = function (req) {
 
@@ -40,13 +28,11 @@ function sendRequest(message) {
     //Include all body and query string parameters
     let extraData = [
         ["status", status],
-        //["include_entities", true],
     ];
 
     let encodedExtraData = encodeData(extraData);
     let encodedFinal = encodedOath.concat(encodedExtraData);
 
-    //let encodedStatus = strictEncodeUri(status);
 
     let headerData = {
         url: "https://api.twitter.com/1.1/statuses/update.json",
@@ -55,7 +41,7 @@ function sendRequest(message) {
         params: {
             status: status
         },
-        //contentType: "application/json"
+        contentType: "application/json"
     };
 
     let signature = createSignature(encodedFinal, headerData);
@@ -67,11 +53,9 @@ function sendRequest(message) {
 
     headerData.headers.Authorization = buildAuthorization(encodedOath);
 
-    // logf(headerData);
-
     let response = request(headerData);
 
-    // logf(response);
+    return response;
 }
 
 //Initializes all possible oauth values. (signature is created later)

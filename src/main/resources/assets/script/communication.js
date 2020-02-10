@@ -39,14 +39,12 @@ function connectService(dataBody) {
     var twitter = document.getElementById("twitter");
 
     httpRequest.addEventListener("load", function (event) {
-        console.log(httpRequest.response);
         let successMessage = document.createElement("p");
         successMessage.className = "success";
         successMessage.innerText = "Posted a new tweet";
         twitter.append(successMessage);
     });
     httpRequest.addEventListener("error", function (event) {
-        console.log(httpRequest.response);
         let errorMessage = document.createElement("p");
         errorMessage.className = "error";
         errorMessage.innerText = "Something went wrong";

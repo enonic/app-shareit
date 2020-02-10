@@ -9,93 +9,63 @@
 
 //More or less a global namespace
 #share-it {
-  margin: 0px 5% 0px 5%;
-  // display           : grid;
-  // grid-template-rows: 50px repeat(3, 150px);
   display: inline-block;
+  margin : 0px 5% 0px 5%;
+  width  : 90%;
 
   h1 {
-    margin-bottom: 16px;
+    font-size: 16px;
   }
 
   .platform {
-    padding: 1rem;
-    margin: 0.1rem 0;
+    margin : 0.1rem 0;
+    padding: 0 3% 50px 3%;
 
-    &.selected {
-      box-shadow: 0px 0px 10px 1px;
-    }
-
-    &.selected .detail {
-      max-height: 400px;
-    }
-
-    &:last-of-type {
-      margin-bottom: 10px;
-    }
-
-    .detail {
-      height: auto;
-      margin-top: 1rem;
-      max-height: 0px;
-      overflow: hidden;
-      transition: max-height 0.5s ease-in-out;
-
-      p {
-        padding: 0.5rem 0;
-      }
-    }
-
-    .banner {
-      h2 {
-        display: inline-block;
-      }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+      display: inline-block;
     }
 
     .image {
-      display: inline-block;
-      vertical-align: middle;
+      display       : inline-block;
+      vertical-align: -1rem;
     }
 
-    input {
-      -moz-appearance: checkbox;
-      -webkit-appearance: checkbox;
-      display: inline-block;
-      width: 20px;
-      height: 20px;
+    textarea.field {
+      box-sizing: border-box;
+      display   : inline-block;
+      min-height: 2rem;
+      padding   : 0.2rem;
+      resize    : vertical;
+      width     : 100%;
     }
 
     label {
       font-size: 2rem;
     }
+
+    .submit {
+      background-color: transparent;
+      border          : 2px solid white;
+      border-radius   : 5px;
+      color           : white;
+      float           : right;
+      font-size       : 1.2rem;
+      margin          : 0.4rem 0;
+    }
   }
 
   //Twitter
-  .twitterLogo {
-    width: 50px;
+  #twitter {
+    background-color: @twitter-blue;
+
+    .twitterLogo {
+      width: 50px;
+    }
   }
 
   //& .other-social {}
-}
-
-#shareButton {
-  position: absolute;
-  left: 5%;
-  bottom: @sharebutton-bottom;
-  width: 90%;
-  background-color: @twitter-blue;
-  border-bottom: 5px solid darken(@twitter-blue, 10%);
-
-  &:active {
-    border-bottom: 0px;
-    border-top: 5px solid darken(@twitter-blue, 10%);
-    bottom: @sharebutton-bottom - 5px;
-  }
-
-  p {
-    color: white;
-    font-size: 2rem;
-    padding: 0.5rem;
-    text-align: center;
-  }
 }

@@ -8,22 +8,15 @@
         <h1>Select your target platform and share</h1>
 
         <div class="platform" id="twitter" tabindex="0">
-            <label class="banner">
-                <input type="checkbox" name="twitter" />
-                <img class="image twitterLogo" data-th-src="${ twitterLogoUrl }" />
-                <h2>Twitter</h2>
-            </label>
-            <div class="detail">
-                <p data-th-text="|${name} ${url}|"></p>
-            </div>
-            <!-- <p>"Max character limit 280"</p> -->
+            <img class="image twitterLogo" data-th-src="${ twitterLogoUrl }" />
+            <h2>Twitter</h2>
+            <textarea class="field" type="text">[[|${name} ${url}|]]</textarea>
+            <!-- <p>"Max character limit 280"</p> TODO -->
+            <button class="submit">TWEET</button>
         </div>
         <div class="platform" tabindex="0">
             <input id="other" type="checkbox" />
         </div>
-    </div>
-    <div id="shareButton">
-        <p>Share</p>
     </div>
 
     <script type="text/javascript" data-th-src="${ communication }"></script>
