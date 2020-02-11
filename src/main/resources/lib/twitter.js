@@ -5,15 +5,12 @@ var encoding = require('/lib/text-encoding');
 var logf = util.log;
 var request = httpLib.request;
 
-//All communicatio with twitter
-exports.post = function (req) {
+exports.sendMessage = function (message) {
 
-    if (req.body && req.body) {
-        let body = JSON.parse(req.body);
-        if (body.twitter) {
-            let response = sendRequest(body.twitter);
-            return response;
-        }
+    let response = sendRequest(message);
+    //TODO check response before returning it 401, 400, 500?
+    if (response) {
+        return response;
     }
 
     return "Error, could not send twitter message";

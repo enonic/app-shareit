@@ -1,55 +1,44 @@
 //TODO add event listeners to each social media
 
-selectBox();
+var shareButtons = document.querySelectorAll("button.submit");
 
-var shareButton = document.getElementById("shareButton");
+for (let button of shareButtons) {
+    button.addEventListener("click", function () {
+        console.log(this.parentNode);
+        let platform = this.parentNode;
+        let media = platform.id;
+        let message = platform.querySelector(".field").value;
 
-shareButton.addEventListener("click", function () {
-    let message = document.getElementById("shareUrl").dataset.message;
-    let platforms = document.querySelectorAll(".platform");
+        console.log(message, media);
 
-    if (platforms.length > 0 && shareUrl != "") {
-        let model = {};
-        for (let i = 0; i < platforms.length; i++) {
-            assignPlatform(platforms[i], model, message);
-        }
-        connectService(model);
-    }
-});
-
-function assignPlatform(platform, model, message) {
-    let socialMedia = platform.id;
-
-    if (socialMedia) {
-        switch (socialMedia) {
-            case "twitter":
-                model.twitter = message;
-                break;
-            default:
-                console.log("could not find" + socialMedia);
-                break;
-        }
-    }
-    return;
+        connectService({
+            platform: media,
+            message: message
+        }, platform);
+    });
 }
 
-function connectService(dataBody) {
-    var serviceUrl = document.getElementById("serviceUrl").dataset.serviceurl;
-    var httpRequest = new XMLHttpRequest();
-    var twitter = document.getElementById("twitter");
+function connectService(dataBody, element) {
+    let serviceUrl = document.getElementById("serviceUrl").dataset.serviceurl;
+    let httpRequest = new XMLHttpRequest();
+    let field = element.querySelector('.field');
 
-    httpRequest.addEventListener("load", function (event) {
-        let successMessage = document.createElement("p");
-        successMessage.className = "success";
-        successMessage.innerText = "Posted a new tweet";
-        twitter.append(successMessage);
-    });
-    httpRequest.addEventListener("error", function (event) {
-        let errorMessage = document.createElement("p");
-        errorMessage.className = "error";
-        errorMessage.innerText = "Something went wrong";
-        twitter.append(errorMessage);
-    });
+    let successMessage = document.createElement("p");
+    successMessage.innerText = "Successfully shared to" + element.id;
+    let errorMessage = document.createElement("p");
+    errorMessage.innerText = "Failed to post message to " + element.id;
+
+    function success(event) {
+        element.replaceChild(field, successMessage);
+        element.querySelector(".submit").disable = true;
+    }
+
+    function error(event) {
+        element.replaceChild(field, event.status + " " + errorMessage);
+    }
+
+    httpRequest.addEventListener("load", success);
+    httpRequest.addEventListener("error", error);
 
     httpRequest.open('POST', serviceUrl, true);
     httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -57,7 +46,7 @@ function connectService(dataBody) {
 }
 
 //Open close on selected box (Each of twitter, facebook, social media widgets)
-function selectBox() {
+/* function selectBox() {
     var platforms = document.querySelectorAll(".platform");
     for (let i = 0; i < platforms.length; i++) {
         let current = platforms[i];
@@ -65,13 +54,13 @@ function selectBox() {
             platformEvent(current, this);
         });
     }
-}
+} */
 
-function platformEvent(platform, target) {
+/* function platformEvent(platform, target) {
     if (target.checked) {
         platform.className += " selected";
     } else {
         platform.className = platform.className.replace(" selected", "");
     }
 
-}
+} */
