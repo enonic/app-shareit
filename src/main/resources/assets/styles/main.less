@@ -49,9 +49,9 @@
 
     .submit {
       background-color: transparent;
-      border          : 2px solid white;
+      border          : 2px solid inherit;
       border-radius   : 5px;
-      color           : white;
+      color           : inherit;
       float           : right;
       font-size       : 1.2rem;
       margin          : 0.4rem 0;
@@ -61,6 +61,11 @@
   //Twitter
   #twitter {
     background-color: @twitter-blue;
+    color: white;
+
+    .submit {
+      border: 2px solid white;
+    }
 
     .twitterLogo {
       width: 50px;

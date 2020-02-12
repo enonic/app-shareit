@@ -4,41 +4,44 @@ var shareButtons = document.querySelectorAll("button.submit");
 
 for (let button of shareButtons) {
     button.addEventListener("click", function () {
-        console.log(this.parentNode);
         let platform = this.parentNode;
         let media = platform.id;
         let message = platform.querySelector(".field").value;
 
-        console.log(message, media);
+        console.log(media, message);
 
-        connectService({
+        serviceSend({
             platform: media,
             message: message
         }, platform);
     });
 }
 
-function connectService(dataBody, element) {
+function serviceSend(dataBody, element) {
     let serviceUrl = document.getElementById("serviceUrl").dataset.serviceurl;
     let httpRequest = new XMLHttpRequest();
     let field = element.querySelector('.field');
 
     let successMessage = document.createElement("p");
-    successMessage.innerText = "Successfully shared to" + element.id;
+    successMessage.innerText = "Successfully shared to " + element.id;
     let errorMessage = document.createElement("p");
     errorMessage.innerText = "Failed to post message to " + element.id;
 
-    function success(event) {
-        element.replaceChild(field, successMessage);
-        element.querySelector(".submit").disable = true;
+    function loaded() {
+        element.querySelector(".submit").setAttribute("disabled", true);
+        if (httpRequest.status == "200") {
+            element.replaceChild(successMessage, field);
+        }
+        else {
+            console.log(httpRequest.statusText);
+            console.log(httpRequest.response);
+            let errorMessageCopy = errorMessage.cloneNode(true);
+            errorMessageCopy.innerText = httpRequest.status + " " + errorMessageCopy.innerText;
+            element.replaceChild(errorMessageCopy, field);
+        }
     }
 
-    function error(event) {
-        element.replaceChild(field, event.status + " " + errorMessage);
-    }
-
-    httpRequest.addEventListener("load", success);
-    httpRequest.addEventListener("error", error);
+    httpRequest.addEventListener("load", loaded);
 
     httpRequest.open('POST', serviceUrl, true);
     httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");

@@ -61,11 +61,11 @@ function createOAuthObject() {
     let timestamp = Math.floor(new Date().getTime() / 1000);
 
     let oath = [
-        ["oauth_consumer_key", app.config.twitter_consumer_key],
+        ["oauth_consumer_key", app.config["twitter.consumer_key"]],
         ["oauth_nonce", random_token],
         ["oauth_signature_method", "HMAC-SHA1"],
         ["oauth_timestamp", timestamp],
-        ["oauth_token", app.config.twitter_user_token],
+        ["oauth_token", app.config["twitter.user_token"]],
         ["oauth_version", "1.0"],
     ];
 
@@ -74,7 +74,7 @@ function createOAuthObject() {
 
 /**
  * Encodes an double array with [key value]
- * @param {Map} oath 
+ * @param {Object} oath 
  */
 function encodeData(oath) {
     let encodedParams = [];
@@ -92,8 +92,8 @@ function encodeData(oath) {
 
 /**
  * Creates the signing signature for the oauth1.0 
- * @param {*} oath 
- * @param {*} header 
+ * @param {Object} oath 
+ * @param {Object} header 
  */
 function createSignature(encodedParams, header) {
     let output = "";
@@ -121,8 +121,8 @@ function createSignature(encodedParams, header) {
     // logf("basestring");
     // logf(output);
 
-    let signingkey = strictEncodeUri(app.config.twitter_consumer_secret);
-    signingkey += '&' + strictEncodeUri(app.config.twitter_user_secret);
+    let signingkey = strictEncodeUri(app.config["twitter.consumer_secret"]);
+    signingkey += '&' + strictEncodeUri(app.config["twitter.user_secret"]);
 
     output = signing(signingkey, output);
 
@@ -131,7 +131,7 @@ function createSignature(encodedParams, header) {
 
 /**
  * Create the authorization header
- * Params is a double array with single (key value) pair
+ * Params is a double array with (key value) pair
  * @param {Array} params 
  */
 function buildAuthorization(params) {
@@ -166,12 +166,13 @@ function signing(key, payload) {
     return encoding.base64Encode(stream);
 }
 
+//Encodes data to be URI friendly (" " -> "%20")
 function strictEncodeUri(str) {
     if (typeof str != String) {
         str = str.toString();
     }
     let encodedStr = encodeURIComponent(str);
-    //Need to be more strict to adhere RFC 3986 
+    //Need to be more strict to adhere to RFC 3986 
     let strictUri = encodedStr.replace(/[!'()*]/g, function (c) {
         return '%' + c.charCodeAt(0).toString(16);
     });
@@ -179,6 +180,7 @@ function strictEncodeUri(str) {
     return strictUri;
 }
 
+//random string generator
 function genRandomString(size) {
     var str = "";
     var alphaNum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

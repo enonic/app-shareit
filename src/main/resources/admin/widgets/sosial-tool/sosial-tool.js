@@ -8,8 +8,8 @@ const view = resolve('sosial-tool.html');
 
 exports.get = function (req) {
 
-    let twitterService = portal.serviceUrl({
-        service: "twitterCom",
+    let sharingService = portal.serviceUrl({
+        service: "share-message",
         type: "absolute"
     });
 
@@ -43,7 +43,8 @@ exports.get = function (req) {
     //Check for config file
     //log.info(JSON.stringify(app.config, null, 4));
     if (app.config) {
-        if (app.config.enable == "false") {
+        //Check empty object
+        if (Object.keys(app.config).length === 0) {
             return errorMessage("Missing configuration file, application not enabled");
         }
     }
@@ -76,7 +77,7 @@ exports.get = function (req) {
         twitterLogoUrl: portal.assetUrl({ path: "images/TwitterWhite.svg" }),
 
         //service
-        serviceUrl: twitterService,
+        serviceUrl: sharingService,
 
         //Scripts
         communication: portal.assetUrl({ path: "script/communication.js" }),

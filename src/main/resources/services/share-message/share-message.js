@@ -4,13 +4,27 @@ var twitter = require("/lib/twitter");
 
 var logf = util.log;
 
-exports.get = function(req) {
-    logf(req.params);
+exports.post = function (req) {
 
-    if (req.body && req.body) {
+    if (req.body) {
         let body = JSON.parse(req.body);
-        if (body.twitter) {
-            twitter.sendMessage(body.twitter);
+        if (body.message != undefined) {
+            if (body.platform == "twitter" && body.message) {
+                return twitter.sendMessage(body.message);
+            }
+            //Linkedin
+            /* if (body.linkedin) {
+                return api.sendMessage(body);  
+            } */
         }
+        return {
+            status: 400,
+            message: "No message was included",
+        };
     }
+
+    return {
+        status: 400,
+        message: "Share message service: header malformed"
+    };
 };
