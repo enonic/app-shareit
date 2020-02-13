@@ -8,8 +8,6 @@ for (let button of shareButtons) {
         let media = platform.id;
         let message = platform.querySelector(".field").value;
 
-        console.log(media, message);
-
         serviceSend({
             platform: media,
             message: message

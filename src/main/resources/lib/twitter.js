@@ -1,6 +1,7 @@
 var httpLib = require('/lib/http-client');
 var util = require('/lib/util');
 var encoding = require('/lib/text-encoding');
+var shareTool = require('/lib/shareTool');
 
 var logf = util.log;
 var request = httpLib.request;
@@ -57,7 +58,7 @@ function sendRequest(message) {
 
 //Initializes all possible oauth values. (signature is created later)
 function createOAuthObject() {
-    let random_token = genRandomString(42);
+    let random_token = shareTool.genRandomString(42);
     let timestamp = Math.floor(new Date().getTime() / 1000);
 
     let oath = [
@@ -180,13 +181,3 @@ function strictEncodeUri(str) {
     return strictUri;
 }
 
-//random string generator
-function genRandomString(size) {
-    var str = "";
-    var alphaNum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (var i = 0; i < size; i++) {
-        str += alphaNum.charAt(Math.ceil(Math.random() * alphaNum.length));
-    }
-
-    return str;
-}
