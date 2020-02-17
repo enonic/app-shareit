@@ -4,7 +4,6 @@ const thymleaf = require('/lib/thymeleaf');
 const context = require('/lib/xp/context');
 const libContent = require('/lib/xp/content');
 const linkedinLib = require('/lib/linkedin');
-const shareTool = require('/lib/share-tool');
 
 const view = resolve('shareit.html');
 
@@ -57,7 +56,7 @@ exports.get = function (req) {
         stylesheet: portal.assetUrl({ path: "styles/main.css" }),
 
         //Linkedin authorize url
-        linkedin: createLinkedinModel(),
+        linkedin: linkedinLib.createAuthenticationUrl,
 
         //images
         twitterLogoUrl: portal.assetUrl({ path: "images/TwitterWhite.svg" }),
@@ -79,35 +78,6 @@ function errorMessage(message) {
     return {
         contentType: 'text/html',
         body: `<widget class="error">${message}</widget>`
-    };
-}
-
-// Creates all thymeleaf variables for linkedin
-function createLinkedinModel() {
-    let authService = portal.serviceUrl({
-        service: "linkedin-authorize",
-        type: "absolute",
-    });
-
-    let redirect = encodeURIComponent(authService);
-    let randomString = shareTool.genRandomString(30);
-    linkedinLib.saveState();
-    
-    let scope = encodeURIComponent("w_member_social"); //r_liteprofile
-
-    let authpage = shareTool.createUrl(
-        "https://www.linkedin.com/oauth/v2/authorization",
-        [
-            { key: "response", value: "code" },
-            { key: "client_id", value: app.config['linkedin.client_id'] },
-            { key: "redirect_uri", value: redirect },
-            { key: "state", value: randomString },
-            { key: "scope", value: scope }
-        ]
-    );
-
-    return {
-        authpage: authpage,
     };
 }
 

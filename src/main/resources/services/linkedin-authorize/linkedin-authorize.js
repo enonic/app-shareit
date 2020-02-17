@@ -1,15 +1,34 @@
-var util = require("/lib/util");
+const util = require("/lib/util");
+const linkedinLib = require("/lib/linkedin");
+const logf = util.log;
 
-var logf = util.log;
+exports.get = function (req) {    
 
-exports.get = function(req) {
-    logf("Authorize return service:");
-    logf(req);
+    let stateIndex = linkedinLib.getStateIndex(req.params.state);
 
-    //Check state
+    if (stateIndex > -1) {
+        linkedinLib.removeState(stateIndex);
+        logf(req.params);
+
+        
+
+    }
+    else {
+        //State not matching return unauthorized
+        logf(req);
+        return {
+            status: 400,
+            body: "Could not authorize the app"
+        };
+    }
 
     //Save to repo
     return {
-        body: "<p>You can now post with linkedin!</p>",
+        status: 200,
+        body: "Application authorized"
     };
 };
+
+function getAccessToken() {
+    const httpLib = require('/lib/http-client');
+}
