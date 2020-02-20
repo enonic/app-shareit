@@ -1,5 +1,6 @@
-const util = require("/lib/util");
 const linkedinLib = require("/lib/linkedin");
+const portal = require('/lib/xp/portal');
+const util = require("/lib/util");
 const logf = util.log;
 
 exports.get = function (req) {    
@@ -7,15 +8,17 @@ exports.get = function (req) {
     let stateIndex = linkedinLib.getStateIndex(req.params.state);
 
     if (stateIndex > -1) {
-        linkedinLib.removeState(stateIndex);
-        logf(req.params);
+        linkedinLib.removeStateIndex(stateIndex);
 
+        let authService = portal.serviceUrl({
+            service: "linkedin-authorize",
+            type: "absolute",
+        });
         
-
+        let accessToken = linkedinLib.exchangeAuthCode(req.params.code, authService);
     }
     else {
-        //State not matching return unauthorized
-        logf(req);
+        //State not matching return error
         return {
             status: 400,
             body: "Could not authorize the app"
@@ -28,7 +31,3 @@ exports.get = function (req) {
         body: "Application authorized"
     };
 };
-
-function getAccessToken() {
-    const httpLib = require('/lib/http-client');
-}

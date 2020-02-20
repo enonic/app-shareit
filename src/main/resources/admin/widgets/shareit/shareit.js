@@ -56,7 +56,7 @@ exports.get = function (req) {
         stylesheet: portal.assetUrl({ path: "styles/main.css" }),
 
         //Linkedin authorize url
-        linkedin: linkedinLib.createAuthenticationUrl,
+        linkedinAuth: linkedinLib.createAuthenticationUrl(),
 
         //images
         twitterLogoUrl: portal.assetUrl({ path: "images/TwitterWhite.svg" }),

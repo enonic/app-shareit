@@ -1,7 +1,6 @@
-const encoding = require('/lib/text-encoding');
 const httpLib = require('/lib/http-client');
 const node = require('/lib/xp/node');
-const repo = require('/lib/xp/repo');
+const portal = require('/lib/xp/portal');
 const shareTool = require('/lib/share-tool');
 const util = require('/lib/util');
 const logf = util.log;
@@ -9,12 +8,14 @@ const logf = util.log;
 //Global Authentication states
 var states = [];
 
-exports.addState = function (state) {
+/* ## State functions */
+exports.addState = addState;
+function addState(state) {
     if (states.length >= 10) {
         states.shift(); //remove first
     }
     states.push(state);
-};
+}
 
 //returns the index of the state or -1 
 exports.getStateIndex = function (state) {
@@ -28,31 +29,59 @@ exports.getStateIndex = function (state) {
     return -1;
 };
 
-//Exchanges a authorization code for a 
-exports.exchangeAuthCode = function (code) {
+//removes the given index
+exports.removeStateIndex = function (index) {
+    states.splice(index, 1);
+};
 
-    let site = libContent.getSite({ key: content._id });
-    let pathAppend = content._path.replace(site._path, "");
+/* ## AccessTokens */
+exports.saveAccessToken = saveAccessToken;
+function saveAccessToken(repo, token, expires_in) {
+    repo.create({
+        _name: "token",
+        _parentPath: "/linkedin/accesstoken",
+        token: token,
+        expires_in,
+    });
+}
 
-    //prepend siteconfig.domain
-    let url = siteConfig.domain + '' + pathAppend;
+exports.getAccessToken = function (repo) {
+    let tokenNode = repo.get("/linkedin/accesstoken");
+    if (tokenNode.id != undefined) {
+        return null;
+    }
+    return tokenNode.token;
+};
 
-    httpLib.request({
+// ## General
+//Exchanges a authorization code for a access token
+exports.exchangeAuthCode = function (code, redirect) {
+
+    let request = httpLib.request({
         url: "https://www.linkedin.com/oauth/v2/accessToken",
         method: "POST",
         contentType: "x-www-form-urlencoded",
         params: {
+            grant_type: "authorization_code",
             code: code,
-            redirectUri
-        },
-        client_id: app.config['linkedin.client_id'],
-        client_secret: app.config['linkedin.client_secret'],
+            redirect_uri: redirect,
+            client_id: app.config['linkedin.client_id'],
+            client_secret: app.config['linkedin.client_secret'],
+        }
     });
-};
 
-//removes the given index
-exports.removeState = function (index) {
-    states.splice(index, 1);
+    log.info("access header");
+    logf(request);
+
+    if (request.status == 200) {
+        let data = JSON.parse(request.body);
+        logf(data.access_token);
+        logf(data.expires_in);
+        let storrage = getRepo();
+        saveAccessToken(storrage, data.access_token, data.expires_in);
+    } else {
+        return request;
+    }
 };
 
 // OAth2 send message
@@ -65,30 +94,17 @@ exports.sendMessage = function () {
 };
 
 /**
- * Returns a connect to app storage
+ * Returns connection to app storage
  * @returns {RepoConnection} 
  */
-exports.getRepo = function () {
+exports.getRepo = getRepo;
+function getRepo() {
     return node.connect({
         repoId: 'com.enonic.app.shareit',
         branch: 'master',
         //Principals: current user
     });
-};
-
-exports.saveAuthCode = function (repo, state) {
-
-};
-
-// Checks storrage if auth exists
-exports.getAuthCode = function (repoCon, state) {
-
-};
-
-// Deletes the current auth from app storage
-exports.deleteAuthcode = function (repoCon, state) {
-
-};
+}
 
 // Creates all thymeleaf variables for linkedin
 exports.createAuthenticationUrl = function () {
@@ -99,7 +115,7 @@ exports.createAuthenticationUrl = function () {
 
     let redirect = encodeURIComponent(authService);
     let randomString = shareTool.genRandomString(30);
-    linkedinLib.addState(randomString);
+    addState(randomString);
 
     let scope = encodeURIComponent("w_member_social"); //r_liteprofile
 
@@ -114,7 +130,5 @@ exports.createAuthenticationUrl = function () {
         ]
     );
 
-    return {
-        authpage: authpage,
-    };
+    return authpage;
 };
