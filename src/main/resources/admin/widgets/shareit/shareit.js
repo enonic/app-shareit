@@ -41,7 +41,6 @@ exports.get = function (req) {
     //prepend siteconfig.domain
     let url = siteConfig.domain + '' + pathAppend;
 
-
     let sharingService = portal.serviceUrl({
         service: "share-message",
         type: "absolute"
@@ -55,11 +54,16 @@ exports.get = function (req) {
         //stylesheets
         stylesheet: portal.assetUrl({ path: "styles/main.css" }),
 
-        //Linkedin authorize url
-        linkedinAuth: linkedinLib.createAuthenticationUrl(),
-
-        //images
-        twitterLogoUrl: portal.assetUrl({ path: "images/TwitterWhite.svg" }),
+        //platforms
+        twitter: {
+            enable: isEnabled("twitter"),
+            logoUrl: portal.assetUrl({ path: "images/TwitterWhite.svg" }),
+        },
+        linkedin: {
+            enable: isEnabled("linkedin"),
+            showAuthorization: linkedinLib.checkAccessToken(),
+            authorizationUrl: linkedinLib.createAuthenticationUrl()
+        },
 
         //service
         serviceUrl: sharingService,
@@ -74,6 +78,19 @@ exports.get = function (req) {
     };
 };
 
+// Checks if the given platform is enabled
+function isEnabled(name) {
+    let config = app.config;
+
+    //hacky but config.twitter.enable throws error
+    //config["twitter.enable"] is how it needs to be accessed
+    let enableProperty = name + ".enable";
+    let enable = config[enableProperty] || false;
+
+    return enable;
+}
+
+// Content studio built in error message
 function errorMessage(message) {
     return {
         contentType: 'text/html',
@@ -81,6 +98,7 @@ function errorMessage(message) {
     };
 }
 
+//Widget set context so we need to get the content
 function getContentId(req) {
     let current = portal.getContent();
     let contentId = req.params.contentId;

@@ -19,7 +19,6 @@ function addState(state) {
 
 //returns the index of the state or -1 
 exports.getStateIndex = function (state) {
-    logf(states);
     for (let i = 0; states.length > i; i++) {
         if (states[i] == state) {
             return i;
@@ -29,32 +28,70 @@ exports.getStateIndex = function (state) {
     return -1;
 };
 
-//removes the given index
+// removes locally storred state
 exports.removeStateIndex = function (index) {
     states.splice(index, 1);
 };
 
 /* ## AccessTokens */
 exports.saveAccessToken = saveAccessToken;
-function saveAccessToken(repo, token, expires_in) {
-    repo.create({
-        _name: "token",
-        _parentPath: "/linkedin/accesstoken",
-        token: token,
-        expires_in,
-    });
-}
+function saveAccessToken(repo, data) {
+    let token;
+    token = data.token;
+    //Expire is in seconds need to be in miliseconds.
+    //Adding miliseconds onto getTime. (Will be off by request time)
+    let expireUtc = new Date().getTime() + (data.expires_in * 1000);
 
-exports.getAccessToken = function (repo) {
-    let tokenNode = repo.get("/linkedin/accesstoken");
-    if (tokenNode.id != undefined) {
+    //Attempt to destory the old node
+    repo.delete("/linkedin/accesstoken");
+    let expireDate = new Date();
+    expireDate.setTime(expireUtc);
+    logf(`Now: ${new Date().toLocaleDateString()} \n Expire: ${expireDate.toLocaleDateString()}`);
+
+    let accessToken = repo.create({
+        _name: "accesstoken",
+        _parentPath: "/linkedin",
+        token: token,
+        expireUtc,
+    });
+
+    if (accessToken == undefined || accessToken == null) {
         return null;
     }
-    return tokenNode.token;
+
+    return accessToken;
+}
+
+//Checks to see if the current access token is valid
+exports.checkAccessToken = function (repo) {
+    if (repo == undefined) {
+        repo = getRepo();
+    }
+    let token = getAccessToken(repo);
+    if (token != null) {
+        //Adding 10 sec so token is refreshed when getting close to expire.
+        let todayUtc = new Date().getTime() - 10 * 1000;
+
+        if (token.expireUtc > todayUtc) {
+            return true;
+        }
+    }
+
+    return false;
 };
 
+exports.getAccessToken = getAccessToken;
+function getAccessToken(repo) {
+    return repo.get("/linkedin/accesstoken");
+}
+
 // ## General
-//Exchanges a authorization code for a access token
+/**
+ * Makes a request to get accesstoken from linkedin. 
+ * @param {String} code authorization code
+ * @param {String} redirect redirect url used in the request
+ * @returns {Object} request if the exchange call
+ */
 exports.exchangeAuthCode = function (code, redirect) {
 
     let request = httpLib.request({
@@ -70,23 +107,39 @@ exports.exchangeAuthCode = function (code, redirect) {
         }
     });
 
-    log.info("access header");
-    logf(request);
-
-    if (request.status == 200) {
-        let data = JSON.parse(request.body);
-        logf(data.access_token);
-        logf(data.expires_in);
-        let storrage = getRepo();
-        saveAccessToken(storrage, data.access_token, data.expires_in);
-    } else {
-        return request;
-    }
+    return request;
 };
 
-// OAth2 send message
-exports.sendMessage = function () {
-    //TODO
+// Uses the linkedin api to post a message to the feed of the user/organization
+exports.sendMessage = function (token, message) {
+    
+    let postBody = {
+        author: "urn:li:organization:37831266",
+        //clientApplication: "{App urn} 77urker4nda4ef"
+        lifecycleState: "PUBLISHED",
+        specificContent: {
+            "com.linkedin.ugc.ShareContent": {
+                media: {
+                    title: message.title,
+                },
+                shareCommentary: {
+                    text: message.text,
+                }
+            }
+        }
+    };
+
+
+    httpLib.request({
+       url: "https://api.linkedin.com/v2/ugcPosts",
+       contentType: "application/json",
+       headers: {
+            "X-Restli-Protocol-Version": "2.0.0",
+           "Authorization": `Bearer ${token}`,
+       },
+       body: JSON.stringify(postBody),
+    });
+    
     return {
         status: 500,
         message: "linkedin WIP"
@@ -106,7 +159,7 @@ function getRepo() {
     });
 }
 
-// Creates all thymeleaf variables for linkedin
+// Creates the authorization 
 exports.createAuthenticationUrl = function () {
     let authService = portal.serviceUrl({
         service: "linkedin-authorize",

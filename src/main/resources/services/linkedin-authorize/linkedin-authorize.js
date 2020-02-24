@@ -4,7 +4,6 @@ const util = require("/lib/util");
 const logf = util.log;
 
 exports.get = function (req) {    
-
     let stateIndex = linkedinLib.getStateIndex(req.params.state);
 
     if (stateIndex > -1) {
@@ -15,7 +14,16 @@ exports.get = function (req) {
             type: "absolute",
         });
         
-        let accessToken = linkedinLib.exchangeAuthCode(req.params.code, authService);
+        let request = linkedinLib.exchangeAuthCode(req.params.code, authService);
+        let data = JSON.parse(request.body);
+        let storrage = linkedinLib.getRepo();
+        let result = linkedinLib.saveAccessToken(storrage, data);
+        if (result == null || result == undefined) {
+            return {
+                status: 500,
+                body: "Could not save accesstoken"
+            };
+        }
     }
     else {
         //State not matching return error
@@ -25,7 +33,7 @@ exports.get = function (req) {
         };
     }
 
-    //Save to repo
+    //Saved to repo
     return {
         status: 200,
         body: "Application authorized"

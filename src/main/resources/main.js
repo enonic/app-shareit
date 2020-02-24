@@ -47,10 +47,6 @@ const contextLib = require('/lib/xp/context');
             _name: "linkedin",
             _parentPath: "/",
         });
-
-        connection.create({
-            _name: "accesstoken",
-            _parentPath: "/linkedin",
-        });
+        
     }
 })();

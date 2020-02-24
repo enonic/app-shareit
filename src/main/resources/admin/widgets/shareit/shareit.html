@@ -8,14 +8,15 @@
         <h1>Select your target platform and share</h1>
 
         <div class="platform" id="twitter" tabindex="0">
-            <img class="image twitterLogo" data-th-src="${ twitterLogoUrl }" />
+            <img class="image twitterLogo" data-th-src="${ twitter.logoUrl }" />
             <h2>Twitter</h2>
             <textarea class="field" type="text">[[|${name} ${url}|]]</textarea>
             <!-- <p>"Max character limit 280"</p> TODO -->
             <button class="submit">TWEET</button>
         </div>
-        <div class="platform" id="linkedin" tabindex="0">
-            <a target="_blank" data-th-href="${ linkedinAuth }">Authorize linkedin</a>
+        <div class="platform" id="linkedin" tabindex="0" dath-th-if="${ linkedin.enable }">
+            <p data-th-text="${ linkedin.showAuthorization ? 'Passed' : 'Did not pass' }"></p>
+            <a target="_blank" data-th-href="${ linkedin.authorizationUrl }">Authorize linkedin</a>
         </div>
     </div>
 
