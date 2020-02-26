@@ -7,7 +7,7 @@ for (let button of shareButtons) {
         let platform = this.parentNode;
         let media = platform.id;
         let message = platform.querySelector(".field").value;
-
+        console.log(platform.id);
         serviceSend({
             platform: media,
             message: message

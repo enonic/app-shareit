@@ -1,9 +1,8 @@
-//Import all social platforms here
-var util = require("/lib/util");
-var twitter = require("/lib/twitter");
+const util = require("/lib/util");
+const twitter = require("/lib/twitter");
 const linkedin = require('/lib/linkedin');
 
-var logf = util.log;
+const logf = util.log;
 
 exports.post = function (req) {
 
@@ -14,23 +13,23 @@ exports.post = function (req) {
             switch (body.platform) {
                 case "twitter":
                     return twitter.sendMessage(message);
-                case "linkedin":
+                case "linkedin": {
                     let repo = linkedin.getRepo();
                     let token = linkedin.getAccessToken(repo);
                     return linkedin.sendMessage(token, message);
+                }
                 default:
-                    logf(`No platform found with name: ${body.platform}`);
+                    logf(`Share-messsage.js: No platform found with name: ${body.platform}`);
                     break;
             }
         }
+        logf("Share-message.js: No message was included");
         return {
             status: 400,
-            message: "No message was included",
         };
     }
-
+    logf("Share-message.js: header malformed");
     return {
         status: 400,
-        message: "Share message service: header malformed"
     };
 };

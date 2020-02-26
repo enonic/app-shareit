@@ -5,6 +5,7 @@
 @sharebutton-bottom: 20px;
 
 @twitter-blue : #1da1f2;
+@linkedin-blue: #0a66c2;
 @import "enonic-admin-artifacts";
 
 //More or less a global namespace
@@ -18,7 +19,7 @@
   }
 
   .platform {
-    margin : 0.1rem 0;
+    margin-bottom: 0.5rem;
     padding: 0 3% 50px 3%;
 
     h1,
@@ -61,7 +62,7 @@
   //Twitter
   #twitter {
     background-color: @twitter-blue;
-    color: white;
+    color           : white;
 
     .submit {
       border: 2px solid white;
@@ -69,6 +70,22 @@
 
     .twitterLogo {
       width: 50px;
+    }
+  }
+
+  #linkedin {
+    background-color: #f1e5dd;
+
+    .linkedinLogo {
+      width  : 150px;
+      padding: 1%;
+    }
+
+    .submit {
+      font-family: sans-serif;
+      background-color: white;
+      border: 2px solid #1a5188;
+      color: #1a5188;
     }
   }
 

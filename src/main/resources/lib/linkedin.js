@@ -36,8 +36,7 @@ exports.removeStateIndex = function (index) {
 /* ## AccessTokens */
 exports.saveAccessToken = saveAccessToken;
 function saveAccessToken(repo, data) {
-    let token;
-    token = data.token;
+    let token = data.access_token;
     //Expire is in seconds need to be in miliseconds.
     //Adding miliseconds onto getTime. (Will be off by request time)
     let expireUtc = new Date().getTime() + (data.expires_in * 1000);
@@ -46,20 +45,19 @@ function saveAccessToken(repo, data) {
     repo.delete("/linkedin/accesstoken");
     let expireDate = new Date();
     expireDate.setTime(expireUtc);
-    logf(`Now: ${new Date().toLocaleDateString()} \n Expire: ${expireDate.toLocaleDateString()}`);
 
-    let accessToken = repo.create({
+    let accessNode = repo.create({
         _name: "accesstoken",
         _parentPath: "/linkedin",
-        token: token,
+        token,
         expireUtc,
     });
 
-    if (accessToken == undefined || accessToken == null) {
+    if (accessNode == undefined || accessNode == null) {
         return null;
     }
 
-    return accessToken;
+    return accessNode;
 }
 
 //Checks to see if the current access token is valid
@@ -67,12 +65,12 @@ exports.checkAccessToken = function (repo) {
     if (repo == undefined) {
         repo = getRepo();
     }
-    let token = getAccessToken(repo);
-    if (token != null) {
-        //Adding 10 sec so token is refreshed when getting close to expire.
-        let todayUtc = new Date().getTime() - 10 * 1000;
+    let node = repo.get("/linkedin/accesstoken");
+    if (node != null) {
+        //removing 30 seconds from expire time on token so it gets refreshed
+        let todayUtc = new Date().getTime() - 30 * 1000;
 
-        if (token.expireUtc > todayUtc) {
+        if (node.expireUtc > todayUtc) {
             return true;
         }
     }
@@ -82,8 +80,70 @@ exports.checkAccessToken = function (repo) {
 
 exports.getAccessToken = getAccessToken;
 function getAccessToken(repo) {
-    return repo.get("/linkedin/accesstoken");
+    let node = repo.get("/linkedin/accesstoken");
+    if (node == null || node.token == undefined) {
+        return null;
+    } else {
+        return node.token;
+    }
 }
+
+// ## person id (urn) methods
+exports.saveUserId = function (repo, id) {
+    //Attempt to destory the old node
+    repo.delete("/linkedin/userId");
+
+    let userNode = repo.create({
+        _name: "userId",
+        _parentPath: "/linkedin",
+        userId: id,
+    });
+
+    if (userNode == undefined || userNode == null) {
+        return null;
+    }
+
+    return userNode;
+};
+
+// Gets the authenticated persons urn from app storrage
+exports.getUserUrn = getUserUrn;
+function getUserUrn(repo) {
+    if (repo == undefined) {
+        repo = getRepo();
+    }
+    let node = repo.get("/linkedin/userId");
+    if (node == null || node.userId == undefined) {
+        return null;
+    } else {
+        return "urn:li:person:" + node.userId;
+    }
+}
+
+// Gets the authenticated persons urn with linkedin api (id)
+exports.requestUserId = function (token) {
+    let response = httpLib.request({
+        contentType: "application/json",
+        headers: {
+            "X-Restli-Protocol-Version": "2.0.0",
+            "Authorization": `Bearer ${token}`,
+        },
+        method: "GET",
+        url: "https://api.linkedin.com/v2/me"
+    });
+
+    if (response && response.body != "") {
+        let data = JSON.parse(response.body);
+        if (data.id) {
+            return data.id;
+        }
+    }
+    if (response.params && response.params.error) {
+        log.info(response.params.error);
+        log.info(response.params.error_description);
+    }
+    return null;
+};
 
 // ## General
 /**
@@ -112,38 +172,45 @@ exports.exchangeAuthCode = function (code, redirect) {
 
 // Uses the linkedin api to post a message to the feed of the user/organization
 exports.sendMessage = function (token, message) {
-    
+    let userUrn = getUserUrn();
+
+    if (userUrn == null) {
+        log.info("Could not get user urn");
+        return {
+            status: 500,
+        };
+    }
+
     let postBody = {
-        author: "urn:li:organization:37831266",
-        //clientApplication: "{App urn} 77urker4nda4ef"
-        lifecycleState: "PUBLISHED",
-        specificContent: {
-            "com.linkedin.ugc.ShareContent": {
-                media: {
-                    title: message.title,
-                },
-                shareCommentary: {
-                    text: message.text,
-                }
-            }
+        owner: userUrn,
+        distribution: {
+            linkedInDistributionTarget: {}
+        },
+        text: {
+            text: message
         }
     };
 
-
-    httpLib.request({
-       url: "https://api.linkedin.com/v2/ugcPosts",
-       contentType: "application/json",
-       headers: {
+    let response = httpLib.request({
+        body: JSON.stringify(postBody),
+        contentType: "application/json",
+        headers: {
             "X-Restli-Protocol-Version": "2.0.0",
-           "Authorization": `Bearer ${token}`,
-       },
-       body: JSON.stringify(postBody),
+            "Authorization": `Bearer ${token}`,
+        },
+        method: "POST",
+        url: "https://api.linkedin.com/v2/shares",
     });
-    
-    return {
-        status: 500,
-        message: "linkedin WIP"
-    };
+
+    if (response.status != 200) {
+        if (response.params && response.params.error) {
+            log.info(response.params.error);
+            log.info(response.params.error_description);
+        } else {
+            log.info("Could not send linkedin message");
+        }
+    }
+    return "Shared message on linkedin";
 };
 
 /**
@@ -170,7 +237,7 @@ exports.createAuthenticationUrl = function () {
     let randomString = shareTool.genRandomString(30);
     addState(randomString);
 
-    let scope = encodeURIComponent("w_member_social"); //r_liteprofile
+    let scope = encodeURIComponent("w_member_social r_liteprofile"); //w_organization_social
 
     let authpage = shareTool.createUrl(
         "https://www.linkedin.com/oauth/v2/authorization",

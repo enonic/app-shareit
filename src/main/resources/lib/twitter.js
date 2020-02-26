@@ -1,7 +1,7 @@
 var httpLib = require('/lib/http-client');
 var util = require('/lib/util');
 var encoding = require('/lib/text-encoding');
-var shareTool = require('/lib/shareTool');
+var shareTool = require('/lib/share-tool');
 
 var logf = util.log;
 var request = httpLib.request;
@@ -30,7 +30,6 @@ function sendRequest(message) {
 
     let encodedExtraData = encodeData(extraData);
     let encodedFinal = encodedOath.concat(encodedExtraData);
-
 
     let headerData = {
         url: "https://api.twitter.com/1.1/statuses/update.json",

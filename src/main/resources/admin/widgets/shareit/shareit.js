@@ -61,6 +61,7 @@ exports.get = function (req) {
         },
         linkedin: {
             enable: isEnabled("linkedin"),
+            logoUrl: portal.assetUrl({ path: "images/Linkedin.png" }),
             showAuthorization: linkedinLib.checkAccessToken(),
             authorizationUrl: linkedinLib.createAuthenticationUrl()
         },

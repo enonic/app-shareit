@@ -15,8 +15,17 @@
             <button class="submit">TWEET</button>
         </div>
         <div class="platform" id="linkedin" tabindex="0" dath-th-if="${ linkedin.enable }">
-            <p data-th-text="${ linkedin.showAuthorization ? 'Passed' : 'Did not pass' }"></p>
-            <a target="_blank" data-th-href="${ linkedin.authorizationUrl }">Authorize linkedin</a>
+            <img class="image linkedinLogo" data-th-src="${ linkedin.logoUrl }" />
+            <!-- <a target="_blank" data-th-href="${ linkedin.authorizationUrl }">Authorize linkedin</a> -->
+            <div data-th-unless="${linkedin.showAuthorization}" data-th-remove="tag">
+                <p>Needs authorization</p>
+                <a target="_blank" data-th-href="${ linkedin.authorizationUrl }">Authorize linkedin</a>
+            </div>
+            <div data-th-if="${linkedin.showAuthorization}" data-th-remove="tag">
+                <textarea class="field" type="text">[[|${name} ${url}|]]</textarea>
+
+                <button class="submit">Share</button>
+            </div>
         </div>
     </div>
 
