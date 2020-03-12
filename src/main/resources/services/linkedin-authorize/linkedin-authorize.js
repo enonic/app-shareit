@@ -40,6 +40,8 @@ exports.get = function (req) {
                 serverError("Could not save the userid");
             }
 
+            //TODO get page/organization to post for
+
         } else {
             return notAuthorized("Invalid state or state not found");
         }

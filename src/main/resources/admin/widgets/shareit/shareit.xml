@@ -4,4 +4,8 @@
   <interfaces>
     <interface>contentstudio.contextpanel</interface>
   </interfaces>
+  <allow>
+    <principal>role:system.admin</principal>
+    <!-- <principal>role:myapp.myrole</principal> -->
+  </allow>
 </widget>

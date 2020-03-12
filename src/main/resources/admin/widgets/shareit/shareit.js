@@ -4,11 +4,12 @@ const thymleaf = require('/lib/thymeleaf');
 const context = require('/lib/xp/context');
 const libContent = require('/lib/xp/content');
 const linkedinLib = require('/lib/linkedin');
+const facebookLib = require('/lib/facebook');
 
 const view = resolve('shareit.html');
 
 exports.get = function (req) {
-    let content = getContentId(req);
+    let content = getContent(req);
     if (content == null) return errorMessage("No content selected");
 
     //content selected in CS
@@ -47,30 +48,34 @@ exports.get = function (req) {
     });
 
     let model = {
-        //content to share/post
-        url,
-        name: content.displayName,
+      //content to share/post
+      url,
+      name: content.displayName,
 
-        //stylesheets
-        stylesheet: portal.assetUrl({ path: "styles/main.css" }),
+      //stylesheets
+      stylesheet: portal.assetUrl({ path: "styles/main.css" }),
 
-        //platforms
-        twitter: {
-            enable: isEnabled("twitter"),
-            logoUrl: portal.assetUrl({ path: "images/TwitterWhite.svg" }),
-        },
-        linkedin: {
-            enable: isEnabled("linkedin"),
-            logoUrl: portal.assetUrl({ path: "images/Linkedin.png" }),
-            showAuthorization: linkedinLib.checkAccessToken(),
-            authorizationUrl: linkedinLib.createAuthenticationUrl()
-        },
+      //platforms
+      twitter: {
+        enable: isEnabled("twitter"),
+        logoUrl: portal.assetUrl({ path: "images/TwitterWhite.svg" })
+      },
+      linkedin: {
+        enable: isEnabled("linkedin"),
+        logoUrl: portal.assetUrl({ path: "images/Linkedin.png" }),
+        showAuthorization: linkedinLib.checkAccessToken(),
+        authorizationUrl: linkedinLib.createAuthenticationUrl()
+      },
+      facebook: {
+        enable: isEnabled("facebook"),
+        authorizationUrl: facebookLib.createAuthenticationUrl()
+      },
 
-        //service
-        serviceUrl: sharingService,
+      //service
+      serviceUrl: sharingService,
 
-        //Scripts
-        communication: portal.assetUrl({ path: "script/communication.js" }),
+      //Scripts
+      communication: portal.assetUrl({ path: "script/communication.js" })
     };
 
     return {
@@ -100,22 +105,12 @@ function errorMessage(message) {
 }
 
 //Widget set context so we need to get the content
-function getContentId(req) {
-    let current = portal.getContent();
+function getContent(req) {
+    /* let current = portal.getContent(); */
     let contentId = req.params.contentId;
-    //Set current if its missing from params
-    if (!contentId && current) {
-        contentId = current._id;
-    }
-
-    //Still missing? Nothing selected
-    if (!contentId) {
+    if (contentId) {
+        return libContent.get({ key: contentId });
+    } else {
         return null;
     }
-
-    if (!current) {
-        current = libContent.get({ key: contentId });
-    }
-
-    return current;
 }

@@ -27,6 +27,11 @@
                 <button class="submit">Share</button>
             </div>
         </div>
+        <div class="platform" id="facebook" tabindex="0" data-th-if="${ facebook.enable }">
+            <a target="_blank" data-th-href="${ facebook.authorizationUrl }">
+                Authorize facebook
+            </a>
+        </div>
     </div>
 
     <script type="text/javascript" data-th-src="${ communication }"></script>
