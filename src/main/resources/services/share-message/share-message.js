@@ -1,6 +1,7 @@
-const util = require("/lib/util");
-const twitter = require("/lib/twitter");
+const util = require('/lib/util');
+const facebook = require('/lib/util');
 const linkedin = require('/lib/linkedin');
+const twitter = require('/lib/twitter');
 
 const logf = util.log;
 
@@ -17,6 +18,11 @@ exports.post = function (req) {
                     let repo = linkedin.getRepo();
                     let token = linkedin.getAccessToken(repo);
                     return linkedin.sendMessage(token, message);
+                }
+                case "facebook": {
+                    let repo = facebook.getRepo();
+                    let token = facebook.getAccessToken(repo);
+                    return facebook.sendMessage(token, message);
                 }
                 default:
                     logf(`Share-messsage.js: No platform found with name: ${body.platform}`);

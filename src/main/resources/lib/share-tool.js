@@ -1,3 +1,5 @@
+const node = require("/lib/xp/node");
+
 //random string generator
 exports.genRandomString = function (size) {
     var str = "";
@@ -8,6 +10,19 @@ exports.genRandomString = function (size) {
 
     return str;
 };
+
+/**
+ * Returns connection to app storage
+ * @returns {RepoConnection} 
+ */
+exports.getRepo = getRepo;
+function getRepo() {
+    return node.connect({
+        repoId: 'com.enonic.app.shareit',
+        branch: 'master',
+        //Principals: current user
+    });
+}
 
 /**
  * Creates a valid url with appended optional params

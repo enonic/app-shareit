@@ -48,5 +48,9 @@ const contextLib = require('/lib/xp/context');
             _parentPath: "/",
         });
         
+        connection.create({
+            _name: "facebook",
+            _parentPath: "/",
+        });
     }
 })();

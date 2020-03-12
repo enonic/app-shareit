@@ -1,10 +1,10 @@
 //var contentLib = require('lib/xpcontent');
-const portal = require('/lib/xp/portal');
-const thymleaf = require('/lib/thymeleaf');
 const context = require('/lib/xp/context');
+const facebookLib = require('/lib/facebook');
 const libContent = require('/lib/xp/content');
 const linkedinLib = require('/lib/linkedin');
-const facebookLib = require('/lib/facebook');
+const portal = require('/lib/xp/portal');
+const thymleaf = require('/lib/thymeleaf');
 
 const view = resolve('shareit.html');
 
@@ -68,6 +68,7 @@ exports.get = function (req) {
       },
       facebook: {
         enable: isEnabled("facebook"),
+        showAuthorization: facebookLib.checkAccessToken(),
         authorizationUrl: facebookLib.createAuthenticationUrl()
       },
 

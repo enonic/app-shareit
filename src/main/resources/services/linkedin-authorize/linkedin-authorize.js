@@ -48,6 +48,8 @@ exports.get = function (req) {
     } else {
         return notAuthorized(`${req.params.error_description}`);
     }
+
+    log.info("Linkedin authorized");
     //Saved to repo
     return {
         status: 200,

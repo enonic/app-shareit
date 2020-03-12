@@ -1,5 +1,4 @@
 const httpLib = require('/lib/http-client');
-const node = require('/lib/xp/node');
 const portal = require('/lib/xp/portal');
 const shareTool = require('/lib/share-tool');
 const util = require('/lib/util');
@@ -63,10 +62,10 @@ function saveAccessToken(repo, data) {
 //Checks to see if the current access token is valid
 exports.checkAccessToken = function (repo) {
     if (repo == undefined) {
-        repo = getRepo();
+        repo = shareTool.getRepo();
     }
     let node = repo.get("/linkedin/accesstoken");
-    if (node != null) {
+    if (node != null && node.token) {
         //removing 30 seconds from expire time on token so it gets refreshed
         let todayUtc = new Date().getTime() - 30 * 1000;
 
@@ -110,7 +109,7 @@ exports.saveUserId = function (repo, id) {
 exports.getUserUrn = getUserUrn;
 function getUserUrn(repo) {
     if (repo == undefined) {
-        repo = getRepo();
+        repo = shareTool.getRepo();
     }
     let node = repo.get("/linkedin/userId");
     if (node == null || node.userId == undefined) {
@@ -213,18 +212,8 @@ exports.sendMessage = function (token, message) {
     return "Shared message on linkedin";
 };
 
-/**
- * Returns connection to app storage
- * @returns {RepoConnection} 
- */
-exports.getRepo = getRepo;
-function getRepo() {
-    return node.connect({
-        repoId: 'com.enonic.app.shareit',
-        branch: 'master',
-        //Principals: current user
-    });
-}
+// Lazy binding so getRepo works in all libs
+exports.getRepo = shareTool.getRepo;
 
 // Creates the authorization 
 exports.createAuthenticationUrl = function () {
