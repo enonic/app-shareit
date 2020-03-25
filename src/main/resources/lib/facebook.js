@@ -36,13 +36,73 @@ exports.removeStateIndex = function(index) {
 // Lazy binding so getRepo works in all libs
 exports.getRepo = shareTool.getRepo;
 
+/* ## User id */
+exports.saveUserid = function(repo, id) {
+    //Attempt to destory the old node
+    repo.delete("/facebook/userid");
+
+    let userNode = repo.create({
+        _name: "userid",
+        _parentPath: "/facebook",
+        userId: id
+    });
+
+    if (userNode == undefined || userNode == null) {
+        return null;
+    }
+
+    return userNode;
+};
+
+exports.getUserid = getUserid;
+function getUserid(repo) {
+    if (repo == undefined) {
+        repo = shareTool.getRepo();
+    }
+    let node = repo.get("/facebook/userid");
+    if (node == null || node.userId == undefined) {
+        return null;
+    } else {
+        return node.userId;
+    }
+}
+
+exports.savePageid = function(id) {
+    //Attempt to destory the old node
+    repo.delete("/facebook/pageid");
+
+    let pageNode = repo.create({
+        _name: "pageid",
+        _parentPath: "/facebook",
+        pageid: id
+    });
+
+    if (pageNode == undefined || pageNode == null) {
+        return null;
+    }
+
+    return pageNode.pageid;
+};
+
+exports.getPageid = function(repo) {
+    if (repo == undefined) {
+        repo = shareTool.getRepo();
+    }
+    let node = repo.get("/facebook/pageid");
+    if (node == null || node.pageid == undefined) {
+        return null;
+    } else {
+        return node.pageid;
+    }
+};
+
 /* ## AccessTokens */
 exports.saveAccessToken = saveAccessToken;
 function saveAccessToken(repo, data) {
     let token = data.access_token;
     //Expire is in seconds need to be in miliseconds.
     //Adding miliseconds onto getTime. (Will be off by request time)
-    let expireUtc = new Date().getTime() + (data.expires_in * 1000);
+    let expireUtc = new Date().getTime() + data.expires_in * 1000;
 
     //Attempt to destory the old node
     repo.delete("/facebook/accesstoken");
@@ -53,7 +113,7 @@ function saveAccessToken(repo, data) {
         _name: "accesstoken",
         _parentPath: "/facebook",
         token,
-        expireUtc,
+        expireUtc
     });
 
     if (accessNode == undefined || accessNode == null) {
@@ -94,7 +154,7 @@ function getAccessToken(repo) {
  * @returns {Object} request if the exchange call
  */
 exports.exchangeAuthCode = function(code, redirect) {
-    let request = httpLib.request({
+    let response = httpLib.request({
         url: " https://graph.facebook.com/v6.0/oauth/access_token",
         method: "GET",
         params: {
@@ -105,7 +165,7 @@ exports.exchangeAuthCode = function(code, redirect) {
         }
     });
 
-    return request;
+    return response;
 };
 
 // Could create this into a shared function
@@ -120,6 +180,7 @@ exports.createAuthenticationUrl = function() {
     let redirect = encodeURIComponent(authService);
     let randomString = shareTool.genRandomString(30);
     addState(randomString);
+    let scope = encodeURIComponent("manage_pages publish_pages");
 
     let authpage = shareTool.createUrl(
         "https://www.facebook.com/v6.0/dialog/oauth",
@@ -128,7 +189,7 @@ exports.createAuthenticationUrl = function() {
             { key: "client_id", value: app.config["facebook.client_id"] },
             { key: "redirect_uri", value: redirect },
             { key: "state", value: randomString },
-            { key: "scope", value: encodeURIComponent("id name email") }
+            { key: "scope", value: scope }
         ]
     );
 
