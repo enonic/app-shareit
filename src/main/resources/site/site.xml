@@ -5,5 +5,16 @@
       <label>Site url you want to use in the application. Example https://mysite.com</label>
       <occurrences minimum="1" maximum="1"/>
     </input>
+
+    <field-set>
+      <label>Facebook</label>
+      <items>
+        <input type="textLine" name="pageId">
+          <label>Page id</label>
+          <help-text>Id of the page where messages will be posted</help-text>
+          <occurrences minimum="1" maximum="1" />
+        </input>
+      </items>
+    </field-set>
   </form>
 </site>

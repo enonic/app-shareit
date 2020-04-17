@@ -63,13 +63,13 @@ exports.get = function (req) {
       linkedin: {
         enable: isEnabled("linkedin"),
         logoUrl: portal.assetUrl({ path: "images/Linkedin.png" }),
-        showAuthorization: linkedinLib.checkAccessToken(),
+        showAuthorization: linkedinLib.checkAccesstoken(),
         authorizationUrl: linkedinLib.createAuthenticationUrl()
       },
       facebook: {
         enable: isEnabled("facebook"),
-        showAuthorization: facebookLib.checkAccessToken(),
-        authorizationUrl: facebookLib.createAuthenticationUrl()
+        showAuthorization: facebookLib.isAuthenticated(),
+        authorizationUrl: facebookLib.createAuthenticationUrl(siteConfig),
       },
 
       //service

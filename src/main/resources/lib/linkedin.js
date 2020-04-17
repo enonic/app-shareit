@@ -33,8 +33,8 @@ exports.removeStateIndex = function (index) {
 };
 
 /* ## AccessTokens */
-exports.saveAccessToken = saveAccessToken;
-function saveAccessToken(repo, data) {
+exports.saveAccesstoken = saveAccesstoken;
+function saveAccesstoken(repo, data) {
     let token = data.access_token;
     //Expire is in seconds need to be in miliseconds.
     //Adding miliseconds onto getTime. (Will be off by request time)
@@ -60,7 +60,7 @@ function saveAccessToken(repo, data) {
 }
 
 //Checks to see if the current access token is valid
-exports.checkAccessToken = function (repo) {
+exports.checkAccesstoken = function (repo) {
     if (repo == undefined) {
         repo = shareTool.getRepo();
     }
@@ -77,8 +77,8 @@ exports.checkAccessToken = function (repo) {
     return false;
 };
 
-exports.getAccessToken = getAccessToken;
-function getAccessToken(repo) {
+exports.getAccessToken = getAccesstoken;
+function getAccesstoken(repo) {
     let node = repo.get("/linkedin/accesstoken");
     if (node == null || node.token == undefined) {
         return null;

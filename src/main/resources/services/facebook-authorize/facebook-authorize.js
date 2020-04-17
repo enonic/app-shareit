@@ -1,106 +1,185 @@
 const facebookLib = require("/lib/facebook");
 const portal = require("/lib/xp/portal");
+const context = require("/lib/xp/context");
 const util = require("/lib/util");
 const logf = util.log;
+const httpLib = require("/lib/http-client");
 const thymeleaf = require("/lib/thymeleaf");
 
-const page = resolve("index.html");
+// Service to create the page token
+exports.get = function (req) {
+    const repo = facebookLib.getRepo();
+    let pageId;
 
-// Service to authenticate the user
-exports.get = function(req) {
-    let repo = facebookLib.getRepo();
-
-    if (req.params && req.params.error == undefined) {
-        let stateIndex = facebookLib.getStateIndex(req.params.state);
-
-        if (stateIndex > -1) {
-            facebookLib.removeStateIndex(stateIndex);
-
-            let authService = portal.serviceUrl({
-                service: "facebook-authorize",
-                type: "absolute"
-            });
-
-            let request = facebookLib.exchangeAuthCode(
-                req.params.code,
-                authService
-            );
-
-            let data = JSON.parse(request.body);
-
-            /* Saving the access token before we have the userid can "brick" the authentication process.
-             Preferably save the access token with userid or not at all */
-            const accessNode = facebookLib.saveAccessToken(repo, data);
-            const accesstoken = facebookLib.getAccessToken(repo);
-            if (accessNode == null || accessNode == undefined) {
-                serverError("Could not save facebook accesstoken");
-            }
-
-            const httpLib = require("/lib/http-client");
-            let useridRes = httpLib.request({
-                method: "GET",
-                url: "https://graph.facebook.com/me",
-                params: {
-                    fields: "id",
-                    access_token: accesstoken
-                }
-            });
-
-            const resData = JSON.parse(useridRes.body);
-            facebookLib.saveUserid(repo, resData.id);
-            if (resData.id) serverError("Could not get user id");
-
-        } else {
-            return notAuthorized("Invalid state or state not found facebook");
-        }
-    } else {
+    if (req.params && req.params.error != undefined) {
         logf(req.params);
-        return notAuthorized("");
+        return notAuthorized("Facebook error returned");
     }
 
-    //Debug section
-    const accesstoken = facebookLib.getAccessToken(repo);
+    const stateData = JSON.parse(req.params.state);
+    let stateIndex = facebookLib.getStateIndex(stateData.state);
+    pageId = stateData.pageId;
 
-    logf(resData);
+    if (stateIndex > -1) {
+        facebookLib.removeStateIndex(stateIndex);
+    } else {
+        return notAuthorized("Invalid state or state not found facebook");
+    }
 
-    let userid = facebookLib.getUserid(repo);
+    if (!pageId) {
+        return notAuthorized("Missing pageId from state param");
+    }
 
-    let account = httpLib.request({
+    let authService = portal.serviceUrl({
+        service: "facebook-authorize",
+        type: "absolute",
+    });
+
+    // Get user access token
+    let userTokenResponse = facebookLib.exchangeAuthCode(
+        req.params.code,
+        authService
+    );
+
+    if (checkFacebookResponse(userTokenResponse)) {
+        return facebookError(
+            userTokenResponse,
+            "Could not get user access token"
+        );
+    }
+
+    // Not saving the user token since its only used once (page token)
+    let data = JSON.parse(userTokenResponse.body);
+    const userToken = data.access_token;
+
+    // Get user id
+    let userIdRes = httpLib.request({
+        method: "GET",
+        url: "https://graph.facebook.com/me",
+        params: {
+            fields: "id",
+            access_token: userToken,
+        },
+    });
+
+    if (checkFacebookResponse(userIdRes)) {
+        return facebookError(userIdRes, "Could not get user id");
+    }
+
+    const resData = JSON.parse(userIdRes.body);
+    let userid = resData.id;
+
+    // Get users linked permissions, accounts
+    let userAccountsRes = httpLib.request({
         method: "GET",
         url: `https://graph.facebook.com/${userid}/accounts`,
         params: {
-            access_token: accesstoken
-        }
+            access_token: userToken,
+        },
     });
 
-    logf("Accounts: ");
-    logf(useraccounts);
-
-    let model = {
-        message: "Facebook authorized",
-        pages: account.data
-    };
-
-    //If everything is sucessful, render the pages choise
-    //Don't know how to handle multiple pages
-    return {
-        body: thymeleaf.render(view, model)
-    };
-};
-
-exports.post = function(req) {
-    if (req.params.pageid){
-        //test page id (Should sanitize it so it does not contain "/" or "?" and other mischief )
-    } else {
-
+    if (checkFacebookResponse(userAccountsRes)) {
+        return facebookError(userAccountsRes, "Could not get user accounts");
     }
+
+    // If the user grants access to more then one page
+    // Render a page with option to choose page:
+    const accounts = JSON.parse(userAccountsRes.body);
+
+    logf(accounts);
+
+    let pageToken;
+
+    for (let i = 0; accounts.data.length; i++) {
+        if (accounts.data[i].id == pageId) {
+            pageToken = createPageToken(userToken, accounts.data[i].id);
+            break;
+        }
+    }
+
+    if (!pageToken || pageToken == null) {
+        return notAuthorized("User needs correct access to the page");
+    }
+
+    let pageData = facebookLib.savePageData(repo, {
+        token: pageToken,
+        name: accounts.data[0].name,
+        id: accounts.data[0].id,
+    });
+    log.info(`Facebook authorization: Can now post to ${pageData.name}`);
+    if (!pageData) {
+        return serverError("pageid could not be saved");
+    }
+    return {
+        status: 200,
+        body: `Facebook authorized. You can now post messages on the ${pageData.name} facebookpage.`,
+    };
 };
+
+/**
+ * Request a page access token from facebook
+ * Saves the page access token in app repo
+ * @param {String} accesstoken UserAccess token
+ * @param {NumericString} pageid pageid
+ * @returns {Object} saves repo node
+ */
+function createPageToken(accesstoken, pageid) {
+    if (pageid == undefined || pageid == null) {
+        return null;
+    }
+
+    let pageRes = httpLib.request({
+        method: "GET",
+        url: `https://graph.facebook.com/${pageid}`,
+        params: {
+            fields: "access_token,name",
+            access_token: accesstoken,
+        },
+    });
+
+    if (checkFacebookResponse(pageRes)) {
+        log.info(`Facebook response error ${pageid}`);
+        return null;
+    }
+
+    let resData = JSON.parse(pageRes.body);
+    const repo = facebookLib.getRepo();
+
+    const pageNode = facebookLib.savePageData(repo, {
+        token: resData.access_token,
+        name: resData.name,
+        id: resData.id,
+    });
+
+    if (!pageNode) {
+        log.info("could not save page token");
+        return null;
+    }
+
+    return pageNode.token;
+}
+
+function checkFacebookResponse(res) {
+    if (res.params && res.params.error) {
+        return true;
+    }
+    return false;
+}
+
+function facebookError(res, message) {
+    logf(res.params);
+    log.info(message);
+    return {
+        status: 500,
+        body: "Facebook integration error",
+    };
+}
 
 function notAuthorized(message) {
     log.info(message);
     return {
         status: 400,
-        body: "Could not authorize facebook"
+        body: "Could not authorize facebook",
     };
 }
 
@@ -108,6 +187,6 @@ function serverError(message) {
     log.info(message);
     return {
         status: 500,
-        body: "Server error, api error"
+        body: "Server error, api error",
     };
 }

@@ -1,6 +1,7 @@
 const httpLib = require("/lib/http-client");
 const portal = require("/lib/xp/portal");
 const shareTool = require("/lib/share-tool");
+// const contextLib = require("/lib/xp/context");
 const util = require("/lib/util");
 const logf = util.log;
 
@@ -18,7 +19,7 @@ function addState(state) {
 }
 
 //returns the index of the state or -1
-exports.getStateIndex = function(state) {
+exports.getStateIndex = function (state) {
     for (let i = 0; states.length > i; i++) {
         if (states[i] == state) {
             return i;
@@ -29,7 +30,7 @@ exports.getStateIndex = function(state) {
 };
 
 // removes locally storred state
-exports.removeStateIndex = function(index) {
+exports.removeStateIndex = function (index) {
     states.splice(index, 1);
 };
 
@@ -37,14 +38,14 @@ exports.removeStateIndex = function(index) {
 exports.getRepo = shareTool.getRepo;
 
 /* ## User id */
-exports.saveUserid = function(repo, id) {
+/* exports.saveUserid = function (repo, id) {
     //Attempt to destory the old node
     repo.delete("/facebook/userid");
 
     let userNode = repo.create({
         _name: "userid",
         _parentPath: "/facebook",
-        userId: id
+        userId: id,
     });
 
     if (userNode == undefined || userNode == null) {
@@ -52,9 +53,9 @@ exports.saveUserid = function(repo, id) {
     }
 
     return userNode;
-};
+}; */
 
-exports.getUserid = getUserid;
+/* exports.getUserid = getUserid;
 function getUserid(repo) {
     if (repo == undefined) {
         repo = shareTool.getRepo();
@@ -65,55 +66,76 @@ function getUserid(repo) {
     } else {
         return node.userId;
     }
-}
+} */
 
-exports.savePageid = function(id) {
+// Saves all page data needed for the facebook api
+exports.savePageData = function (repo, data) {
     //Attempt to destory the old node
-    repo.delete("/facebook/pageid");
+    repo.delete("/facebook/page");
+
+    if (
+        data.id == undefined ||
+        data.token == undefined ||
+        data.name == undefined
+    ) {
+        throw "Data parameter missing on create page node";
+    }
 
     let pageNode = repo.create({
-        _name: "pageid",
+        _name: "page",
         _parentPath: "/facebook",
-        pageid: id
+        pageId: data.id,
+        token: data.token,
+        name: data.name,
     });
 
     if (pageNode == undefined || pageNode == null) {
         return null;
     }
 
-    return pageNode.pageid;
+    return pageNode;
 };
 
-exports.getPageid = function(repo) {
+exports.getPageData = getPageData;
+function getPageData(repo) {
+    let node = repo.get("/facebook/page");
+
+    if (!node) {
+        return null;
+    } 
+
+    return {
+        pageId: node.pageId,
+        token: node.token,
+        name: node.name,
+    };
+}
+
+// check if facebook page is authenticated or not
+// TODO probablity just check for pagetoken
+exports.isAuthenticated = function (repo) {
     if (repo == undefined) {
         repo = shareTool.getRepo();
     }
-    let node = repo.get("/facebook/pageid");
-    if (node == null || node.pageid == undefined) {
-        return null;
+    let pageNode = getPageData(repo);
+    if (pageNode && pageNode.token) {
+        return true;
     } else {
-        return node.pageid;
+        return false;
     }
 };
 
 /* ## AccessTokens */
-exports.saveAccessToken = saveAccessToken;
-function saveAccessToken(repo, data) {
-    let token = data.access_token;
-    //Expire is in seconds need to be in miliseconds.
-    //Adding miliseconds onto getTime. (Will be off by request time)
-    let expireUtc = new Date().getTime() + data.expires_in * 1000;
-
+// user access token, should be renames
+/* exports.createUserToken = createUserToken;
+function createUserToken(repo, token) {
     //Attempt to destory the old node
-    repo.delete("/facebook/accesstoken");
-    let expireDate = new Date();
-    expireDate.setTime(expireUtc);
+    repo.delete("/facebook/userToken");
 
     let accessNode = repo.create({
-        _name: "accesstoken",
+        _name: "userToken",
         _parentPath: "/facebook",
-        token,
-        expireUtc
+        token
     });
 
     if (accessNode == undefined || accessNode == null) {
@@ -121,39 +143,32 @@ function saveAccessToken(repo, data) {
     }
 
     return accessNode;
-}
+} */
 
 //Checks to see if the current access token is valid
-exports.checkAccessToken = function(repo) {
-    if (repo == undefined) {
-        repo = shareTool.getRepo();
-    }
-    let node = repo.get("/facebook/accesstoken");
-    if (node != null && node.token) {
-        return true;
-    }
-
-    return false;
-};
-
-exports.getAccessToken = getAccessToken;
-function getAccessToken(repo) {
-    let node = repo.get("/facebook/accesstoken");
+// ## user access token
+/* exports.getUserToken = getUserToken;
+function getUserToken(repo) {
+    let node = repo.get("/facebook/userToken");
     if (node == null || !node.token) {
         return null;
     }
 
+    // Its only used to create page token.
+    // Can be two steps so needs to be saved.
+    repo.delete("/facebook/userToken");
+
     return node.token;
-}
+} */
 
 // ## General
 /**
- * Makes a request to get accesstoken from linkedin.
+ * Makes a request to get accesstoken from facebook.
  * @param {String} code authorization code
  * @param {String} redirect redirect url used in the request
  * @returns {Object} request if the exchange call
  */
-exports.exchangeAuthCode = function(code, redirect) {
+exports.exchangeAuthCode = function (code, redirect) {
     let response = httpLib.request({
         url: " https://graph.facebook.com/v6.0/oauth/access_token",
         method: "GET",
@@ -161,26 +176,69 @@ exports.exchangeAuthCode = function(code, redirect) {
             code: code,
             redirect_uri: redirect,
             client_id: app.config["facebook.client_id"],
-            client_secret: app.config["facebook.client_secret"]
-        }
+            client_secret: app.config["facebook.client_secret"],
+        },
     });
 
     return response;
 };
 
-// Could create this into a shared function
-// Switch case each one? or service, state params, clientid
-// Creates the authorization
-exports.createAuthenticationUrl = function() {
+/**
+ * Post on a facebook feed with given message
+ */
+exports.postPageMessage = function (message) {
+    const repo = shareTool.getRepo();
+    const data = getPageData(repo);
+    const pageId = data.pageId;
+    const pageToken = data.token;
+
+    const response = httpLib.request({
+        method: "POST",
+        url: `https://graph.facebook.com/${pageId}/feed`,
+        params: {
+            message: message,
+            access_token: pageToken
+        }
+    });
+
+    logf(response);
+
+    let postid = JSON.parse(response.body).id;
+    
+    if (postid) {
+        return {
+            status: 200,
+            message: "Posted message to facebook page",
+        };    
+    } else {
+        return {
+            status: 500,
+            message: "Could not post message",
+        };
+    }
+};
+
+// The url that the user needs to login and approve
+exports.createAuthenticationUrl = function (siteConfig) {
     let authService = portal.serviceUrl({
         service: "facebook-authorize",
-        type: "absolute"
+        type: "absolute",
     });
+
+    let pageId = siteConfig ? siteConfig.pageId  : "";
+
+    if (!pageId) {
+        return null;
+    }
 
     let redirect = encodeURIComponent(authService);
     let randomString = shareTool.genRandomString(30);
     addState(randomString);
     let scope = encodeURIComponent("manage_pages publish_pages");
+    let states = JSON.stringify({
+        state: randomString,
+        pageId: siteConfig.pageId,
+    });
 
     let authpage = shareTool.createUrl(
         "https://www.facebook.com/v6.0/dialog/oauth",
@@ -188,8 +246,8 @@ exports.createAuthenticationUrl = function() {
             { key: "response_type", value: "code" },
             { key: "client_id", value: app.config["facebook.client_id"] },
             { key: "redirect_uri", value: redirect },
-            { key: "state", value: randomString },
-            { key: "scope", value: scope }
+            { key: "state", value: states },
+            { key: "scope", value: scope },
         ]
     );
 

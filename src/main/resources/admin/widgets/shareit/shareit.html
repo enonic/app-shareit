@@ -16,19 +16,25 @@
         </div>
         <div class="platform" id="linkedin" tabindex="0" dath-th-if="${ linkedin.enable }">
             <img class="image linkedinLogo" data-th-src="${ linkedin.logoUrl }" />
-            <!-- <a target="_blank" data-th-href="${ linkedin.authorizationUrl }">Authorize linkedin</a> -->
-            <div data-th-unless="${linkedin.showAuthorization}" data-th-remove="tag">
-                <p>Needs authorization</p>
-                <a target="_blank" data-th-href="${ linkedin.authorizationUrl }">Authorize linkedin</a>
-            </div>
-            <div data-th-if="${linkedin.showAuthorization}" data-th-remove="tag">
+            <div data-th-if="${ linkedin.showAuthorization }" data-th-remove="tag">
                 <textarea class="field" type="text">[[|${name} ${url}|]]</textarea>
 
                 <button class="submit">Share</button>
             </div>
+            <div data-th-unless="${linkedin.showAuthorization}" data-th-remove="tag">
+                <p>Needs authorization</p>
+                <a target="_blank" data-th-href="${ linkedin.authorizationUrl }">Authorize linkedin</a>
+            </div>
         </div>
         <div class="platform" id="facebook" tabindex="0" data-th-if="${ facebook.enable }">
-            <a target="_blank" data-th-href="${ facebook.authorizationUrl }">
+            <img class="image facebookLogo" src="" />
+            <div data-th-if="${ facebook.showAuthorization }" data-th-remove="tag">
+                <textarea class="field" type="text"> [[|${name} ${url}|]]</textarea>
+
+                <button class="submit">Post on page</button>
+            </div>
+            <a data-th-unless="${ facebook.showAuthorization }" target="_blank"
+                data-th-href="${ facebook.authorizationUrl }">
                 Authorize facebook
             </a>
         </div>
