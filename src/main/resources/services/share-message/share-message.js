@@ -8,6 +8,7 @@ const logf = util.log;
 exports.post = function (req) {
 
     if (req.body) {
+        log.info(req.body);
         let body = JSON.parse(req.body);
         let message = body.message;
         if (message != undefined && message != "") {

@@ -25,15 +25,22 @@ function serviceSend(dataBody, element) {
     let httpRequest = new XMLHttpRequest();
     let field = element.querySelector(".field");
 
-    let successMessage = document.createElement("p");
-    successMessage.innerText = "Successfully shared to " + element.id;
+/*     let successMessage = document.createElement("p");
+    successMessage.innerText = "Successfully shared to " + element.id; */
     let errorMessage = document.createElement("p");
     errorMessage.innerText = "Failed to post message to " + element.id;
 
     function loaded() {
         element.querySelector(".submit").setAttribute("disabled", true);
-        if (httpRequest.status == "200") {
-            element.replaceChild(successMessage, field);
+        if (httpRequest.status == "200" || httpRequest.status == "201") {
+            let message = document.createElement("p");
+            message.innerText = "New share on linkedin: ";
+            let link = document.createElement("a");
+            let data = JSON.parse(httpRequest.response);
+            link.setAttribute("href", data.url);
+            link.innerText = "link";
+            message.appendChild(link);
+            element.replaceChild(message, field);
         } else {
             console.log(httpRequest.statusText);
             console.log(httpRequest.response);

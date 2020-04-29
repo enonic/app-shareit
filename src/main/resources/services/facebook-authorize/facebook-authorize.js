@@ -82,11 +82,7 @@ exports.get = function (req) {
         return facebookError(userAccountsRes, "Could not get user accounts");
     }
 
-    // If the user grants access to more then one page
-    // Render a page with option to choose page:
     const accounts = JSON.parse(userAccountsRes.body);
-
-    logf(accounts);
 
     let pageToken;
 

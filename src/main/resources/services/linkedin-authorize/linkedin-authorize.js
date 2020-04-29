@@ -1,59 +1,52 @@
 const linkedinLib = require("/lib/linkedin");
-const portal = require('/lib/xp/portal');
+const portal = require("/lib/xp/portal");
 const util = require("/lib/util");
 const logf = util.log;
 
 // Service to authenticate the user
 // Also requests the user id from linkedin (URN)
 exports.get = function (req) {
-    if (req.params && req.params.error == undefined) {
-        let stateIndex = linkedinLib.getStateIndex(req.params.state);
+    if ( req.params.error != undefined) {
+        logf(req);
+        return notAuthorized('Error returned from linkedin');
+    }
 
-        if (stateIndex > -1) {
-            linkedinLib.removeStateIndex(stateIndex);
+    let stateIndex = linkedinLib.getStateIndex(req.params.state);
 
-            let authService = portal.serviceUrl({
-                service: "linkedin-authorize",
-                type: "absolute",
-            });
+    if (stateIndex < -1) {
+        return notAuthorized(`Invalid or not found state`);
+    }
 
-            let request = linkedinLib.exchangeAuthCode(req.params.code, authService);
-            let data = JSON.parse(request.body);
-            let repo = linkedinLib.getRepo();
-            
-            /* Saving the access token before we have the userid can "brick" the authentication process.
-             Preferably save the access token with userid or not at all */
-            let accessNode = linkedinLib.saveAccessToken(repo, data);
-            if (accessNode == null || accessNode == undefined) {
-                serverError("Could not save accesstoken");
-            }
+    linkedinLib.removeStateIndex(stateIndex);
 
-            //Fetch and save userID
-            let userId = linkedinLib.requestUserId(accessNode.token);
-            if (userId == null) {
-                serverError("Could not get person id from linkedin api");
-            }
+    let authService = portal.serviceUrl({
+        service: "linkedin-authorize",
+        type: "absolute",
+    });
 
-            //Save user id
-            let useridNode = linkedinLib.saveUserId(repo, userId);
-            if (useridNode == null) {
-                serverError("Could not save the userid");
-            }
+    let request = linkedinLib.exchangeAuthCode(req.params.code, authService);
+    let accessTokenData = JSON.parse(request.body);
+    let repo = linkedinLib.getRepo();
+    let accessToken = accessTokenData.access_token;
 
-            //TODO get page/organization to post for
+    //TODO lookup and save organization id
+    let node = linkedinLib.saveOrganizationIdByName("devtestco", accessToken);
+    if (node == null) {
+        return notAuthorized("Could not save organization id");
+    }
 
-        } else {
-            return notAuthorized("Invalid state or state not found");
-        }
-    } else {
-        return notAuthorized(`${req.params.error_description}`);
+    //Cant save access token before organization lookup since it can fail.
+    //Authentication is successful if the accessToken gets saved
+    let accessNode = linkedinLib.saveAccessToken(repo, accessTokenData);
+    if (accessNode == null || accessNode == undefined) {
+        return serverError("Could not save accesstoken");
     }
 
     log.info("Linkedin authorized");
-    //Saved to repo
+
     return {
         status: 200,
-        body: "Application authorized"
+        body: "Application authorized",
     };
 };
 
@@ -61,7 +54,7 @@ function notAuthorized(message) {
     log.info(message);
     return {
         status: 400,
-        body: "Could not authorize the app"
+        body: "Could not authorize the app",
     };
 }
 
@@ -69,6 +62,6 @@ function serverError(message) {
     log.info(message);
     return {
         status: 500,
-        body: "Server error, api error"
+        body: "Server error, api error",
     };
 }
