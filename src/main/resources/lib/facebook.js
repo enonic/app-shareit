@@ -113,9 +113,13 @@ function getPageData(repo) {
 
 // check if facebook page is authenticated or not
 // TODO probablity just check for pagetoken
-exports.isAuthenticated = function (repo) {
+exports.isAuthenticated = function (siteName, repo) {
     if (repo == undefined) {
         repo = shareTool.getRepo();
+    }
+    let facebookNode = repo.exists(`/${siteName}/facebook`);
+    if (!facebookNode) {
+        return false;
     }
     let pageNode = getPageData(repo);
     if (pageNode && pageNode.token) {

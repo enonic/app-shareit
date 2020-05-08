@@ -6,6 +6,48 @@
       <occurrences minimum="1" maximum="1"/>
     </input>
 
+    <input type="textline" name="test">
+      <label>Something</label>
+    </input>
+
+    <item-set name="linkedin">
+      <label>Linkedin app</label>
+      <occurrences minimum="0" maximum="1" />
+      <items>
+        <input type="textline" name="page_name">
+          <label>Page name</label>
+          <occurrences minimum="1" maximum="1"/>
+        </input>
+        <input type="textline" name="app_id">
+          <label>App id</label>
+          <occurrences minimum="1" maximum="1"/>
+        </input>
+        <input type="textline" name="app_scret">
+          <label>App secret</label>
+          <occurrences minimum="1" maximum="1"/>
+        </input>
+      </items>
+    </item-set>
+
+    <item-set name="facebook">
+      <label>Facebook app</label>
+      <occurrences minimum="0" maximum="1" />
+      <items>
+        <input type="textline" name="page_id">
+          <label>Page id</label>
+          <occurrences minimum="1" maximum="1"/>
+        </input>
+        <input type="textline" name="app_id">
+          <label>App id</label>
+          <occurrences minimum="1" maximum="1"/>
+        </input>
+        <input type="textline" name="app_scret">
+          <label>App secret</label>
+          <occurrences minimum="1" maximum="1"/>
+        </input>
+      </items>
+    </item-set>
+
     <field-set>
       <label>Facebook</label>
       <items>

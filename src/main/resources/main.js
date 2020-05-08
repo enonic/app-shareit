@@ -14,19 +14,7 @@ const contextLib = require("/lib/xp/context");
         principal: ["role:system.admin"],
     };
 
-    contextLib.run(context, runAll);
-
-    function runAll() {
-        createRepo();
-
-        let connection = node.connect({
-            repoId: "com.enonic.app.shareit",
-            branch: "master",
-        });
-
-        createLinkedin(connection);
-        createFacebook(connection);
-    }
+    contextLib.run(context, createRepo);
 
     function createRepo() {
         if (repoLib.get("com.enonic.app.shareit")) {
@@ -50,40 +38,6 @@ const contextLib = require("/lib/xp/context");
                     deny: [],
                 },
             ],
-        });
-    }
-
-    function createLinkedin(connection) {
-        if (connection.get("/linkedin")) {
-            return;
-        }
-
-        //linkedin storrage
-        connection.create({
-            _name: "linkedin",
-            _parentPath: "/",
-        });
-    }
-
-    function createFacebook(connection) {
-        if (connection.get("/facebook")) {
-            return;
-        }
-
-        connection.create({
-            _name: "facebook",
-            _parentPath: "/",
-        });
-    }
-
-    function createTwitter(connection) {
-        if (connection.get("/twitter")) {
-            return;
-        }
-
-        connection.create({
-            _name: "twitter",
-            _parentPath: "/",
         });
     }
 })();
