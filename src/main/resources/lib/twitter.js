@@ -52,7 +52,16 @@ function sendRequest(message) {
 
     let response = request(headerData);
 
-    return response;
+    let tweetData = JSON.parse(response.body);
+    let screenName = tweetData.user.screen_name;
+    let id = tweetData.id_str;
+
+    return {
+        status: 201,
+        body: JSON.stringify({
+            url: `https://twitter.com/${screenName}/status/${id}`,
+        }),
+    };
 }
 
 //Initializes all possible oauth values. (signature is created later)
@@ -111,15 +120,9 @@ function createSignature(encodedParams, header) {
         }
     }
 
-    // logf("parameter string");
-    // logf(param);
-
     let method = header.method.toUpperCase();
     output = method + '&' + strictEncodeUri(header.url);
     output += '&' + strictEncodeUri(param);
-
-    // logf("basestring");
-    // logf(output);
 
     let signingkey = strictEncodeUri(app.config["twitter.consumer_secret"]);
     signingkey += '&' + strictEncodeUri(app.config["twitter.user_secret"]);
@@ -146,9 +149,6 @@ function buildAuthorization(params) {
             output += ', ';
         }
     }
-
-    // logf("Auth header params");
-    // logf(output);
 
     return output;
 }

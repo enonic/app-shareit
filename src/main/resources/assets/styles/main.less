@@ -6,6 +6,7 @@
 
 @twitter-blue : #1da1f2;
 @linkedin-blue: #0a66c2;
+@facebook-blue: #1d4a92; //Custom colour
 @import "enonic-admin-artifacts";
 
 //More or less a global namespace
@@ -20,7 +21,7 @@
 
   .platform {
     margin-bottom: 0.5rem;
-    padding: 0 3% 50px 3%;
+    padding      : 0 3% 50px 3%;
 
     h1,
     h2,
@@ -68,6 +69,10 @@
       border: 2px solid white;
     }
 
+    a {
+      color: black;
+    }
+
     .twitterLogo {
       width: 50px;
     }
@@ -82,12 +87,29 @@
     }
 
     .submit {
-      font-family: sans-serif;
+      font-family     : sans-serif;
       background-color: white;
-      border: 2px solid #1a5188;
-      color: #1a5188;
+      border          : 2px solid #1a5188;
+      color           : #1a5188;
     }
   }
 
-  //& .other-social {}
+  #facebook {
+    background-color: @facebook-blue;
+    color           : white;
+
+    .facebookLogo {
+      height : 30px;
+      padding: (30px / 4);
+    }
+
+    a {
+      color: white; 
+    }
+
+    .submit {
+      border: 2px solid white;
+      color: white;
+    }
+  }
 }

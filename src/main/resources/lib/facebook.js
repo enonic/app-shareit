@@ -102,7 +102,7 @@ function getPageData(repo) {
 
     if (!node) {
         return null;
-    } 
+    }
 
     return {
         pageId: node.pageId,
@@ -197,23 +197,44 @@ exports.postPageMessage = function (message) {
         url: `https://graph.facebook.com/${pageId}/feed`,
         params: {
             message: message,
-            access_token: pageToken
-        }
+            access_token: pageToken,
+        },
     });
 
-    logf(response);
-
     let postid = JSON.parse(response.body).id;
-    
-    if (postid) {
-        return {
-            status: 200,
-            message: "Posted message to facebook page",
-        };    
-    } else {
+
+    if (!postid) {
+        log.info("Could not find id");
         return {
             status: 500,
-            message: "Could not post message",
+            message: "Error facebook lib",
+        };
+    }
+
+    const postDataResponse = httpLib.request({
+        method: "GET",
+        url: `https://graph.facebook.com/${postid}/`,
+        params: {
+            fields: "permalink_url",
+            message: message,
+            access_token: pageToken,
+        },
+    });
+    
+    let permalink = JSON.parse(postDataResponse.body).permalink_url;
+
+    if (permalink) {
+        return {
+            status: 201,
+            body: JSON.stringify({
+                url: permalink
+            })
+        };
+    } else {
+        log.info("Could not get permalink, message was still created!");
+        return {
+            status: 500,
+            message: "Error facebook lib"
         };
     }
 };
@@ -225,7 +246,7 @@ exports.createAuthenticationUrl = function (siteConfig) {
         type: "absolute",
     });
 
-    let pageId = siteConfig ? siteConfig.pageId  : "";
+    let pageId = siteConfig ? siteConfig.pageId : "";
 
     if (!pageId) {
         return null;

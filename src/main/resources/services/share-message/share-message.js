@@ -24,16 +24,16 @@ exports.post = function (req) {
                     return facebook.postPageMessage(message);
                 }
                 default:
-                    logf(`Share-messsage.js: No platform found with name: ${body.platform}`);
+                    log.info(`Share-messsage.js: No platform found with name: ${body.platform}`);
                     break;
             }
         }
-        logf("Share-message.js: No message was included");
+        log.info("Share-message.js: No message was included");
         return {
             status: 400,
         };
     }
-    logf("Share-message.js: header malformed");
+    log.info("Share-message.js: header malformed");
     return {
         status: 400,
     };

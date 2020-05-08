@@ -68,6 +68,7 @@ exports.get = function (req) {
       },
       facebook: {
         enable: isEnabled("facebook"),
+        logoUrl: portal.assetUrl({ path: "images/f_logo.png" }),
         showAuthorization: facebookLib.isAuthenticated(),
         authorizationUrl: facebookLib.createAuthenticationUrl(siteConfig),
       },

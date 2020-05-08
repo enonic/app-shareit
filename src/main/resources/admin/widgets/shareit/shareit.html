@@ -27,7 +27,8 @@
             </div>
         </div>
         <div class="platform" id="facebook" tabindex="0" data-th-if="${ facebook.enable }">
-            <img class="image facebookLogo" src="" />
+            <img class="image facebookLogo" data-th-src="${ facebook.logoUrl }" />
+            <h2>Facebook</h2>
             <div data-th-if="${ facebook.showAuthorization }" data-th-remove="tag">
                 <textarea class="field" type="text"> [[|${name} ${url}|]]</textarea>
 

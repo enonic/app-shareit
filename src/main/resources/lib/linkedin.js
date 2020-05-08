@@ -209,9 +209,6 @@ function saveOrganizationIdByName(name, accessToken) {
     }
     let result = JSON.parse(response.body);
 
-    log.info("Vanityname search");
-    logf(result);
-
     if (result.elements.length == 0) {
         log.info(`Could not find any organizations with name: ${name}`);
         return {
@@ -303,8 +300,6 @@ exports.sendMessage = function (token, message) {
         url: "https://api.linkedin.com/v2/shares",
     });
 
-    logf(response);
-
     let data = JSON.parse(response.body);
 
     if (response.status != 201) {
@@ -320,18 +315,12 @@ exports.sendMessage = function (token, message) {
         }
     }
 
-    let url = createActivityUrl(data.activity);
-
-    log.info(url);
+    let url = `https://linkedin.com//feed/update/${data.activity}`;
 
     return {
         status: 201,
         body: JSON.stringify({ url: url }),
     };
-
-    function createActivityUrl(urn) {
-        return `https://linkedin.com//feed/update/${urn}`;
-    }
 };
 
 // Lazy binding so getRepo works in all libs

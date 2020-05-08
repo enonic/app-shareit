@@ -25,16 +25,16 @@ function serviceSend(dataBody, element) {
     let httpRequest = new XMLHttpRequest();
     let field = element.querySelector(".field");
 
-/*     let successMessage = document.createElement("p");
+    /*     let successMessage = document.createElement("p");
     successMessage.innerText = "Successfully shared to " + element.id; */
     let errorMessage = document.createElement("p");
-    errorMessage.innerText = "Failed to post message to " + element.id;
+    errorMessage.innerText = "Failed to post message to " + dataBody.platform;
 
     function loaded() {
         element.querySelector(".submit").setAttribute("disabled", true);
         if (httpRequest.status == "200" || httpRequest.status == "201") {
             let message = document.createElement("p");
-            message.innerText = "New share on linkedin: ";
+            message.innerText = "Success! Find the "+messageName(dataBody.platform) +" here: ";
             let link = document.createElement("a");
             let data = JSON.parse(httpRequest.response);
             link.setAttribute("href", data.url);
@@ -61,4 +61,18 @@ function serviceSend(dataBody, element) {
 
     // user context should be included. If not, need to add security.
     httpRequest.send(JSON.stringify(dataBody));
+}
+
+function messageName(media) {
+    console.log(media);
+    switch (media) {
+        case "linkedin":
+            return "share";
+        case "facebook":
+            return "post";
+        case "twitter":
+            return "tweet";
+        default:
+            return "";
+    }
 }
