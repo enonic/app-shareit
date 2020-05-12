@@ -1,10 +1,10 @@
 const facebookLib = require("/lib/facebook");
 const portal = require("/lib/xp/portal");
-const context = require("/lib/xp/context");
+//const context = require("/lib/xp/context");
+const contentLib = require("/lib/xp/content");
 const util = require("/lib/util");
 const logf = util.log;
 const httpLib = require("/lib/http-client");
-const thymeleaf = require("/lib/thymeleaf");
 
 // Service to create the page token
 exports.get = function (req) {
@@ -17,8 +17,9 @@ exports.get = function (req) {
     }
 
     const stateData = JSON.parse(req.params.state);
-    let stateIndex = facebookLib.getStateIndex(stateData.state);
+    let stateIndex = facebookLib.getKeyIndex(stateData.state);
     pageId = stateData.pageId;
+    let siteId = stateData.siteId;
 
     if (stateIndex > -1) {
         facebookLib.removeStateIndex(stateIndex);
@@ -35,10 +36,23 @@ exports.get = function (req) {
         type: "absolute",
     });
 
+    let site = contentLib.getSite({
+        key: siteId,
+    });
+
+    let siteConfig;
+    let configs = site.data.siteConfig;
+    for (let i = 0; i < configs.length; i++) {
+        if (configs[i].applicationKey == app.name) {
+            siteConfig = configs[i].config;
+        }
+    }
+
     // Get user access token
     let userTokenResponse = facebookLib.exchangeAuthCode(
         req.params.code,
-        authService
+        authService,
+        siteConfig
     );
 
     if (checkFacebookResponse(userTokenResponse)) {
@@ -84,31 +98,37 @@ exports.get = function (req) {
 
     const accounts = JSON.parse(userAccountsRes.body);
 
-    let pageToken;
+    let responsePageData;
 
     for (let i = 0; accounts.data.length; i++) {
         if (accounts.data[i].id == pageId) {
-            pageToken = createPageToken(userToken, accounts.data[i].id);
+            responsePageData = requestPageData(userToken, accounts.data[i].id);
             break;
         }
     }
 
-    if (!pageToken || pageToken == null) {
+    if (!responsePageData || responsePageData == null) {
         return notAuthorized("User needs correct access to the page");
     }
 
-    let pageData = facebookLib.savePageData(repo, {
-        token: pageToken,
-        name: accounts.data[0].name,
-        id: accounts.data[0].id,
+    // Creates if not exists
+    facebookLib.createSiteRepo(repo, site._name);
+
+    // Save the data we need about the page
+    let pageNode = facebookLib.savePageData(repo, site._name, {
+        // Response gives the page token
+        token: responsePageData.access_token,
+        name: responsePageData.name,
+        id: responsePageData.id,
     });
-    log.info(`Facebook authorization: Can now post to ${pageData.name}`);
-    if (!pageData) {
+
+    log.info(`Facebook authorization: Can now post to ${pageNode.name}`);
+    if (!pageNode) {
         return serverError("pageid could not be saved");
     }
     return {
         status: 200,
-        body: `Facebook authorized. You can now post messages on the ${pageData.name} facebookpage.`,
+        body: `Facebook authorized. You can now post messages on the ${pageNode.name} facebookpage.`,
     };
 };
 
@@ -119,7 +139,7 @@ exports.get = function (req) {
  * @param {NumericString} pageid pageid
  * @returns {Object} saves repo node
  */
-function createPageToken(accesstoken, pageid) {
+function requestPageData(accesstoken, pageid) {
     if (pageid == undefined || pageid == null) {
         return null;
     }
@@ -138,32 +158,17 @@ function createPageToken(accesstoken, pageid) {
         return null;
     }
 
-    let resData = JSON.parse(pageRes.body);
-    const repo = facebookLib.getRepo();
-
-    const pageNode = facebookLib.savePageData(repo, {
-        token: resData.access_token,
-        name: resData.name,
-        id: resData.id,
-    });
-
-    if (!pageNode) {
-        log.info("could not save page token");
-        return null;
-    }
-
-    return pageNode.token;
+    return JSON.parse(pageRes.body);
 }
 
 function checkFacebookResponse(res) {
-    if (res.params && res.params.error) {
+    if (res.status != 200 && res.status != 201) {
         return true;
     }
     return false;
 }
 
 function facebookError(res, message) {
-    logf(res.params);
     log.info(message);
     return {
         status: 500,

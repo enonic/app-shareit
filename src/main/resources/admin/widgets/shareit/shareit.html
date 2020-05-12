@@ -1,24 +1,23 @@
 <widget class="shareMain">
-    <!--Link in body. Will be changed in future versions of XP. Iframe?-->
+    <!-- Link in body. Changed in future versions of XP? -->
     <link data-th-href="${ stylesheet }" rel="stylesheet" type="text/css" />
     <div class="hidden" id="serviceUrl" data-th-attr='data-serviceurl=${serviceUrl}'></div>
-    <!-- <div class="hidden" id="shareUrl" data-th-attr='data-message=${name +" "+ url}'></div> -->
 
     <div id="share-it">
         <h1>Select your target platform and share</h1>
 
-        <div class="platform" id="twitter" tabindex="0">
+        <div class="platform" id="twitter" tabindex="0" data-th-if="${ twitter.enable == true }">
             <img class="image twitterLogo" data-th-src="${ twitter.logoUrl }" />
             <h2>Twitter</h2>
             <textarea class="field" type="text">[[|${name} ${url}|]]</textarea>
             <!-- <p>"Max character limit 280"</p> TODO -->
             <button class="submit">TWEET</button>
         </div>
-        <div class="platform" id="linkedin" tabindex="0" dath-th-if="${ linkedin.enable }">
+        <div class="platform" id="linkedin" tabindex="0" data-th-if="${ linkedin.enable == true }">
             <img class="image linkedinLogo" data-th-src="${ linkedin.logoUrl }" />
             <div data-th-if="${ linkedin.showAuthorization }" data-th-remove="tag">
                 <textarea class="field" type="text">[[|${name} ${url}|]]</textarea>
-
+                <!-- /* I would really like to avoid adding the pageid this way, but how? */ -->
                 <button class="submit">Share</button>
             </div>
             <div data-th-unless="${linkedin.showAuthorization}" data-th-remove="tag">
@@ -26,13 +25,13 @@
                 <a target="_blank" data-th-href="${ linkedin.authorizationUrl }">Authorize linkedin</a>
             </div>
         </div>
-        <div class="platform" id="facebook" tabindex="0" data-th-if="${ facebook.enable }">
+        <div class="platform" id="facebook" tabindex="0" data-th-if="${ facebook.enable == true }">
             <img class="image facebookLogo" data-th-src="${ facebook.logoUrl }" />
             <h2>Facebook</h2>
             <div data-th-if="${ facebook.showAuthorization }" data-th-remove="tag">
                 <textarea class="field" type="text"> [[|${name} ${url}|]]</textarea>
 
-                <button class="submit">Post on page</button>
+                <button data-th-attr="data-pageid=${ facebook.pageId }" class="submit">Post on page</button>
             </div>
             <a data-th-unless="${ facebook.showAuthorization }" target="_blank"
                 data-th-href="${ facebook.authorizationUrl }">

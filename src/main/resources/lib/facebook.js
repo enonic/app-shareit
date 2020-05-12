@@ -19,9 +19,9 @@ function addState(state) {
 }
 
 //returns the index of the state or -1
-exports.getStateIndex = function (state) {
+exports.getKeyIndex = function (key) {
     for (let i = 0; states.length > i; i++) {
-        if (states[i] == state) {
+        if (states[i] == key) {
             return i;
         }
     }
@@ -68,22 +68,33 @@ function getUserid(repo) {
     }
 } */
 
+exports.createSiteRepo = function (repo, siteName) {
+    let result = repo.exists(siteName);
+    // Create only if it does not exist
+    if (result == false) {
+        repo.create({
+            _name: `${siteName}`,
+            _parentPath: "/",
+        });
+    }
+};
+
 // Saves all page data needed for the facebook api
-exports.savePageData = function (repo, data) {
+exports.savePageData = function (repo, sitename, data) {
     //Attempt to destory the old node
-    repo.delete("/facebook/page");
+    repo.delete(`/${sitename}/facebook`);
 
     if (
-        data.id == undefined ||
-        data.token == undefined ||
-        data.name == undefined
+        data.id == "undefined" ||
+        data.token == "undefined" ||
+        data.name == "undefined"
     ) {
         throw "Data parameter missing on create page node";
     }
 
     let pageNode = repo.create({
-        _name: "page",
-        _parentPath: "/facebook",
+        _name: "facebook",
+        _parentPath: `/${sitename}`,
         pageId: data.id,
         token: data.token,
         name: data.name,
@@ -97,10 +108,10 @@ exports.savePageData = function (repo, data) {
 };
 
 exports.getPageData = getPageData;
-function getPageData(repo) {
-    let node = repo.get("/facebook/page");
+function getPageData(repo, sitename) {
+    let node = repo.get(`/${sitename}/facebook`);
 
-    if (!node) {
+    if (node == false) {
         return null;
     }
 
@@ -118,10 +129,10 @@ exports.isAuthenticated = function (siteName, repo) {
         repo = shareTool.getRepo();
     }
     let facebookNode = repo.exists(`/${siteName}/facebook`);
-    if (!facebookNode) {
+    if (facebookNode == false) {
         return false;
     }
-    let pageNode = getPageData(repo);
+    let pageNode = getPageData(repo, siteName);
     if (pageNode && pageNode.token) {
         return true;
     } else {
@@ -172,15 +183,15 @@ function getUserToken(repo) {
  * @param {String} redirect redirect url used in the request
  * @returns {Object} request if the exchange call
  */
-exports.exchangeAuthCode = function (code, redirect) {
+exports.exchangeAuthCode = function (code, redirect, siteConfig) {
     let response = httpLib.request({
         url: " https://graph.facebook.com/v6.0/oauth/access_token",
         method: "GET",
         params: {
             code: code,
             redirect_uri: redirect,
-            client_id: app.config["facebook.client_id"],
-            client_secret: app.config["facebook.client_secret"],
+            client_id: siteConfig.facebook.app_id,
+            client_secret: siteConfig.facebook.app_secret,
         },
     });
 
@@ -190,9 +201,9 @@ exports.exchangeAuthCode = function (code, redirect) {
 /**
  * Post on a facebook feed with given message
  */
-exports.postPageMessage = function (message) {
+exports.postPageMessage = function (message, siteName) {
     const repo = shareTool.getRepo();
-    const data = getPageData(repo);
+    const data = getPageData(repo, siteName);
     const pageId = data.pageId;
     const pageToken = data.token;
 
@@ -224,27 +235,27 @@ exports.postPageMessage = function (message) {
             access_token: pageToken,
         },
     });
-    
+
     let permalink = JSON.parse(postDataResponse.body).permalink_url;
 
     if (permalink) {
         return {
             status: 201,
             body: JSON.stringify({
-                url: permalink
-            })
+                url: permalink,
+            }),
         };
     } else {
         log.info("Could not get permalink, message was still created!");
         return {
             status: 500,
-            message: "Error facebook lib"
+            message: "Error facebook lib",
         };
     }
 };
 
 // The url that the user needs to login and approve
-exports.createAuthenticationUrl = function (siteConfig) {
+exports.createAuthenticationUrl = function (siteConfig, siteId) {
     let authService = portal.serviceUrl({
         service: "facebook-authorize",
         type: "absolute",
@@ -263,6 +274,7 @@ exports.createAuthenticationUrl = function (siteConfig) {
     let states = JSON.stringify({
         state: randomString,
         pageId: siteConfig.pageId,
+        siteId: siteId,
     });
 
     let authpage = shareTool.createUrl(

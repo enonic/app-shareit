@@ -6,10 +6,6 @@
       <occurrences minimum="1" maximum="1"/>
     </input>
 
-    <input type="textline" name="test">
-      <label>Something</label>
-    </input>
-
     <item-set name="linkedin">
       <label>Linkedin app</label>
       <occurrences minimum="0" maximum="1" />
@@ -22,7 +18,7 @@
           <label>App id</label>
           <occurrences minimum="1" maximum="1"/>
         </input>
-        <input type="textline" name="app_scret">
+        <input type="textline" name="app_secret">
           <label>App secret</label>
           <occurrences minimum="1" maximum="1"/>
         </input>
@@ -41,22 +37,33 @@
           <label>App id</label>
           <occurrences minimum="1" maximum="1"/>
         </input>
-        <input type="textline" name="app_scret">
+        <input type="textline" name="app_secret">
           <label>App secret</label>
           <occurrences minimum="1" maximum="1"/>
         </input>
       </items>
     </item-set>
 
-    <field-set>
-      <label>Facebook</label>
+    <item-set name="twitter">
+      <label>Twitter</label>
       <items>
-        <input type="textLine" name="pageId">
-          <label>Page id</label>
-          <help-text>Id of the page where messages will be posted</help-text>
-          <occurrences minimum="1" maximum="1" />
+        <input type="textline" name="consumer_key">
+          <label>Consumer key</label>
+          <occurrences minimum="1" maximum="1"/>
+        </input>
+        <input type="textline" name="consumer_secret">
+          <label>Consumer secret</label>
+          <occurrences minimum="1" maximum="1"/>
+        </input>
+        <input type="textline" name="user_token">
+          <label>User token</label>
+          <occurrences minimum="1" maximum="1"/>
+        </input>
+        <input type="textline" name="user_secret">
+          <label>User secret</label>
+          <occurrences minimum="1" maximum="1"/>
         </input>
       </items>
-    </field-set>
+    </item-set>
   </form>
 </site>
