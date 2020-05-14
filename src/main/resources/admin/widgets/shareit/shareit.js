@@ -21,11 +21,12 @@ exports.get = function (req) {
     if (!siteConfig.domain)
         return errorMessage("App not configured for this site");
 
-    //Check for config file
-    if (app.config && Object.keys(app.config).length === 0) {
-        return errorMessage(
-            "Missing configuration file, application not enabled"
-        );
+    if (
+        isFacebookEnabled(siteConfig) == false &&
+        isLinkedinEnabled(siteConfig) == false &&
+        isTwitterEnabled(siteConfig) == false
+    ) {
+        return errorMessage("No social media configured for this site");
     }
 
     var published;
@@ -58,6 +59,9 @@ exports.get = function (req) {
         //stylesheets
         stylesheet: portal.assetUrl({ path: "styles/main.css" }),
 
+        //Current site
+        siteId: site._id,
+
         //platforms
         twitter: {
             enable: false,
@@ -66,14 +70,13 @@ exports.get = function (req) {
         linkedin: {
             enable: isLinkedinEnabled(siteConfig),
             logoUrl: portal.assetUrl({ path: "images/Linkedin.png" }),
-            showAuthorization: linkedinLib.checkAccesstoken(),
-            authorizationUrl: linkedinLib.createAuthenticationUrl(),
+            showAuthorization: linkedinLib.isAuthenticated(site._name),
+            authorizationUrl: linkedinLib.createAuthenticationUrl(site._id),
         },
         facebook: {
             enable: isFacebookEnabled(siteConfig),
             logoUrl: portal.assetUrl({ path: "images/f_logo.png" }),
             showAuthorization: facebookLib.isAuthenticated(site._name),
-            pageId: site._id,
             authorizationUrl: facebookLib.createAuthenticationUrl(
                 siteConfig,
                 site._id
@@ -94,7 +97,7 @@ exports.get = function (req) {
 };
 
 function isFacebookEnabled(siteConfig) {
-    if (siteConfig.facebook != "undefined") {
+    if (siteConfig.hasOwnProperty("facebook")) {
         let settings = siteConfig.facebook;
         // Should be enabled at this point, but need to idiot proof.
         if (settings.app_secret && settings.app_id && settings.page_id) {
@@ -105,13 +108,18 @@ function isFacebookEnabled(siteConfig) {
 }
 
 function isLinkedinEnabled(siteConfig) {
-    if (siteConfig.linkedin != "undefined") {
+    if (siteConfig.hasOwnProperty("linkedin")) {
         let settings = siteConfig.linkedin;
         if (settings.page_name && settings.app_id && settings.app_secret) {
             return true;
         }
     }
 
+    return false;
+}
+
+// TODO check twitter settings
+function isTwitterEnabled(siteConfig) {
     return false;
 }
 

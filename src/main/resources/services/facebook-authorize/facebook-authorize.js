@@ -9,7 +9,6 @@ const httpLib = require("/lib/http-client");
 // Service to create the page token
 exports.get = function (req) {
     const repo = facebookLib.getRepo();
-    let pageId;
 
     if (req.params && req.params.error != undefined) {
         logf(req.params);
@@ -18,7 +17,6 @@ exports.get = function (req) {
 
     const stateData = JSON.parse(req.params.state);
     let stateIndex = facebookLib.getKeyIndex(stateData.state);
-    pageId = stateData.pageId;
     let siteId = stateData.siteId;
 
     if (stateIndex > -1) {
@@ -41,6 +39,7 @@ exports.get = function (req) {
     });
 
     let siteConfig;
+    // tools function candidate
     let configs = site.data.siteConfig;
     for (let i = 0; i < configs.length; i++) {
         if (configs[i].applicationKey == app.name) {
@@ -101,7 +100,7 @@ exports.get = function (req) {
     let responsePageData;
 
     for (let i = 0; accounts.data.length; i++) {
-        if (accounts.data[i].id == pageId) {
+        if (accounts.data[i].id == siteConfig.facebook.page_id) {
             responsePageData = requestPageData(userToken, accounts.data[i].id);
             break;
         }
@@ -110,9 +109,6 @@ exports.get = function (req) {
     if (!responsePageData || responsePageData == null) {
         return notAuthorized("User needs correct access to the page");
     }
-
-    // Creates if not exists
-    facebookLib.createSiteRepo(repo, site._name);
 
     // Save the data we need about the page
     let pageNode = facebookLib.savePageData(repo, site._name, {

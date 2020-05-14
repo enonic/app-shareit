@@ -2,6 +2,7 @@
     <!-- Link in body. Changed in future versions of XP? -->
     <link data-th-href="${ stylesheet }" rel="stylesheet" type="text/css" />
     <div class="hidden" id="serviceUrl" data-th-attr='data-serviceurl=${serviceUrl}'></div>
+    <div class="hidden" id="siteId" data-th-attr="data-siteid=${ siteId }"></div>
 
     <div id="share-it">
         <h1>Select your target platform and share</h1>
@@ -17,7 +18,6 @@
             <img class="image linkedinLogo" data-th-src="${ linkedin.logoUrl }" />
             <div data-th-if="${ linkedin.showAuthorization }" data-th-remove="tag">
                 <textarea class="field" type="text">[[|${name} ${url}|]]</textarea>
-                <!-- /* I would really like to avoid adding the pageid this way, but how? */ -->
                 <button class="submit">Share</button>
             </div>
             <div data-th-unless="${linkedin.showAuthorization}" data-th-remove="tag">
@@ -31,7 +31,7 @@
             <div data-th-if="${ facebook.showAuthorization }" data-th-remove="tag">
                 <textarea class="field" type="text"> [[|${name} ${url}|]]</textarea>
 
-                <button data-th-attr="data-pageid=${ facebook.pageId }" class="submit">Post on page</button>
+                <button class="submit">Post on page</button>
             </div>
             <a data-th-unless="${ facebook.showAuthorization }" target="_blank"
                 data-th-href="${ facebook.authorizationUrl }">

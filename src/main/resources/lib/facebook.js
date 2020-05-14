@@ -1,6 +1,6 @@
 const httpLib = require("/lib/http-client");
 const portal = require("/lib/xp/portal");
-const shareTool = require("/lib/share-tool");
+const toolsLib = require("/lib/tools");
 // const contextLib = require("/lib/xp/context");
 const util = require("/lib/util");
 const logf = util.log;
@@ -35,7 +35,7 @@ exports.removeStateIndex = function (index) {
 };
 
 // Lazy binding so getRepo works in all libs
-exports.getRepo = shareTool.getRepo;
+exports.getRepo = toolsLib.getRepo;
 
 /* ## User id */
 /* exports.saveUserid = function (repo, id) {
@@ -58,7 +58,7 @@ exports.getRepo = shareTool.getRepo;
 /* exports.getUserid = getUserid;
 function getUserid(repo) {
     if (repo == undefined) {
-        repo = shareTool.getRepo();
+        repo = toolsLib.getRepo();
     }
     let node = repo.get("/facebook/userid");
     if (node == null || node.userId == undefined) {
@@ -68,19 +68,9 @@ function getUserid(repo) {
     }
 } */
 
-exports.createSiteRepo = function (repo, siteName) {
-    let result = repo.exists(siteName);
-    // Create only if it does not exist
-    if (result == false) {
-        repo.create({
-            _name: `${siteName}`,
-            _parentPath: "/",
-        });
-    }
-};
-
 // Saves all page data needed for the facebook api
 exports.savePageData = function (repo, sitename, data) {
+    toolsLib.createSiteRepo(repo, sitename);
     //Attempt to destory the old node
     repo.delete(`/${sitename}/facebook`);
 
@@ -126,7 +116,7 @@ function getPageData(repo, sitename) {
 // TODO probablity just check for pagetoken
 exports.isAuthenticated = function (siteName, repo) {
     if (repo == undefined) {
-        repo = shareTool.getRepo();
+        repo = toolsLib.getRepo();
     }
     let facebookNode = repo.exists(`/${siteName}/facebook`);
     if (facebookNode == false) {
@@ -202,7 +192,7 @@ exports.exchangeAuthCode = function (code, redirect, siteConfig) {
  * Post on a facebook feed with given message
  */
 exports.postPageMessage = function (message, siteName) {
-    const repo = shareTool.getRepo();
+    const repo = toolsLib.getRepo();
     const data = getPageData(repo, siteName);
     const pageId = data.pageId;
     const pageToken = data.token;
@@ -268,16 +258,15 @@ exports.createAuthenticationUrl = function (siteConfig, siteId) {
     }
 
     let redirect = encodeURIComponent(authService);
-    let randomString = shareTool.genRandomString(30);
+    let randomString = toolsLib.genRandomString(30);
     addState(randomString);
     let scope = encodeURIComponent("manage_pages publish_pages");
     let states = JSON.stringify({
         state: randomString,
-        pageId: siteConfig.pageId,
         siteId: siteId,
     });
 
-    let authpage = shareTool.createUrl(
+    let authpage = toolsLib.createUrl(
         "https://www.facebook.com/v6.0/dialog/oauth",
         [
             { key: "response_type", value: "code" },

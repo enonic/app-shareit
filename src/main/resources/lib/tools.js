@@ -3,7 +3,8 @@ const node = require("/lib/xp/node");
 //random string generator
 exports.genRandomString = function (size) {
     var str = "";
-    var alphaNum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var alphaNum =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     for (var i = 0; i < size; i++) {
         str += alphaNum.charAt(Math.ceil(Math.random() * alphaNum.length));
     }
@@ -11,15 +12,29 @@ exports.genRandomString = function (size) {
     return str;
 };
 
+exports.createSiteRepo = function (repo, siteName) {
+    log.info(siteName);
+
+    let result = repo.exists(`/${siteName}`);
+
+    // Create only if it does not exist
+    if (result == false) {
+        repo.create({
+            _name: `${siteName}`,
+            _parentPath: "/",
+        });
+    }
+};
+
 /**
  * Returns connection to app storage
- * @returns {RepoConnection} 
+ * @returns {RepoConnection}
  */
 exports.getRepo = getRepo;
 function getRepo() {
     return node.connect({
-        repoId: 'com.enonic.app.shareit',
-        branch: 'master',
+        repoId: "com.enonic.app.shareit",
+        branch: "master",
         //Principals: current user
     });
 }
@@ -35,9 +50,8 @@ exports.createUrl = function (url, params) {
         for (let i = 0; i < params.length; i++) {
             let pair = params[i];
             //First param add ? or add &
-            let prefix = i==0 ? '?' : '&';
+            let prefix = i == 0 ? "?" : "&";
             url += `${prefix}${pair.key}=${pair.value}`;
-            
         }
     }
     return url;

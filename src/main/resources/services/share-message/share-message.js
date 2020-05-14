@@ -10,25 +10,23 @@ exports.post = function (req) {
     if (req.body) {
         let body = JSON.parse(req.body);
         let message = body.message;
-        let pageId = body.pageId;
+        let siteId = body.siteId;
         let siteName = null;
-        if (pageId) {
-            siteName = contentLib.get({ key: pageId })._name;
+        if (siteId) {
+            siteName = contentLib.get({ key: siteId })._name;
         }
 
         if (message != undefined && message != "") {
             switch (body.platform) {
                 case "twitter":
                     return twitter.sendMessage(message);
-                case "linkedin": {
-                    let repo = linkedin.getRepo();
-                    let token = linkedin.getAccessToken(repo);
-                    return linkedin.sendMessage(token, message);
-                }
-                case "facebook": {
-                    logf(pageId);
+
+                case "linkedin":
+                    return linkedin.sendMessage(message, siteName);
+
+                case "facebook":
                     return facebook.postPageMessage(message, siteName);
-                }
+
                 default:
                     log.info(
                         `Share-messsage.js: No platform found with name: ${body.platform}`

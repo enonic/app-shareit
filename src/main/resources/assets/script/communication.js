@@ -5,19 +5,17 @@ for (let button of shareButtons) {
         let platform = this.parentNode;
         let field = platform.querySelector(".field");
         let message = field.value;
-        let pageId = null;
-        if (this.dataset && this.dataset.pageid) {
-            pageId = this.dataset.pageid;
-        }
         field.disabled = true;
-        field.value = "Creating facebook page post";
+        let messageType = messageName(platform.id);
+        field.value = `Creating ${platform.id} ${messageType}`;
 
-        serviceSend(platform, message, pageId);
+        serviceSend(platform, message);
     });
 }
 
-function serviceSend(platform, message, pageId) {
+function serviceSend(platform, message) {
     let serviceUrl = document.getElementById("serviceUrl").dataset.serviceurl;
+    let siteId = document.getElementById("siteId").dataset.siteid;
     let httpRequest = new XMLHttpRequest();
     let field = platform.querySelector(".field");
 
@@ -33,6 +31,7 @@ function serviceSend(platform, message, pageId) {
             let link = document.createElement("a");
             let data = JSON.parse(httpRequest.response);
             link.setAttribute("href", data.url);
+            link.setAttribute("target", "_blank");
             link.innerText = "link";
             info.appendChild(link);
             platform.replaceChild(info, field);
@@ -58,17 +57,15 @@ function serviceSend(platform, message, pageId) {
         platform: platform.id,
         message: message,
     };
-    
-    if (pageId) {
-        console.log("Added page id to sencd package");
-        block.pageId = pageId;
+
+    if (siteId) {
+        block.siteId = siteId;
     }
     // user context should be included. If not, need to add security.
     httpRequest.send(JSON.stringify(block));
 }
 
 function messageName(media) {
-    console.log(media);
     switch (media) {
         case "linkedin":
             return "share";

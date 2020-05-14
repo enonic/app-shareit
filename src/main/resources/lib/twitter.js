@@ -1,7 +1,7 @@
 var httpLib = require('/lib/http-client');
 var util = require('/lib/util');
 var encoding = require('/lib/text-encoding');
-var shareTool = require('/lib/share-tool');
+var toolsLib = require('/lib/tools');
 
 var logf = util.log;
 var request = httpLib.request;
@@ -66,7 +66,7 @@ function sendRequest(message) {
 
 //Initializes all possible oauth values. (signature is created later)
 function createOAuthObject() {
-    let random_token = shareTool.genRandomString(42);
+    let random_token = toolsLib.genRandomString(42);
     let timestamp = Math.floor(new Date().getTime() / 1000);
 
     let oath = [
