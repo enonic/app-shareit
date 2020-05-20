@@ -1,0 +1,12 @@
+= Setup
+
+This doc will explain how to setup the shareit application
+
+There are 3 available social media platforms. +
+*Facebook* *Linkedin* *Twitter*
+
+Each of the platfroms has a different way to be eneabled.
+
+link:twitter.adoc[Twitter setup] +
+link:linkedin.adoc[Linkedin setup] +
+link:twitter.adoc[Facebook setup] +

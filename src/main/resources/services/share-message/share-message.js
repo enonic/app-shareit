@@ -19,7 +19,7 @@ exports.post = function (req) {
         if (message != undefined && message != "") {
             switch (body.platform) {
                 case "twitter":
-                    return twitter.sendMessage(message);
+                    return twitter.sendMessage(message, siteId);
 
                 case "linkedin":
                     return linkedin.sendMessage(message, siteName);

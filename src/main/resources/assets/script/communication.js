@@ -23,7 +23,10 @@ function serviceSend(platform, message) {
     errorMessage.innerText = "Failed to post message to " + platform.id;
 
     function loaded() {
-        platform.querySelector(".submit").disabled = true;
+        let button = platform.querySelector(".submit");
+        button.style.visibility = "hidden";
+        //button.style.pointerEvents = "none";
+
         if (httpRequest.status == "200" || httpRequest.status == "201") {
             let info = document.createElement("p");
             info.innerText =

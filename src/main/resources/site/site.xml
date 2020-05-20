@@ -15,11 +15,11 @@
           <occurrences minimum="1" maximum="1"/>
         </input>
         <input type="textline" name="app_id">
-          <label>App id</label>
+          <label>Client id</label>
           <occurrences minimum="1" maximum="1"/>
         </input>
         <input type="textline" name="app_secret">
-          <label>App secret</label>
+          <label>Client secret</label>
           <occurrences minimum="1" maximum="1"/>
         </input>
       </items>
@@ -48,19 +48,19 @@
       <label>Twitter</label>
       <items>
         <input type="textline" name="consumer_key">
-          <label>Consumer key</label>
+          <label>Api key</label>
           <occurrences minimum="1" maximum="1"/>
         </input>
         <input type="textline" name="consumer_secret">
-          <label>Consumer secret</label>
+          <label>Api secret key</label>
           <occurrences minimum="1" maximum="1"/>
         </input>
         <input type="textline" name="user_token">
-          <label>User token</label>
+          <label>Access token</label>
           <occurrences minimum="1" maximum="1"/>
         </input>
         <input type="textline" name="user_secret">
-          <label>User secret</label>
+          <label>Access token secret</label>
           <occurrences minimum="1" maximum="1"/>
         </input>
       </items>

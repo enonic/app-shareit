@@ -1,14 +1,14 @@
-var httpLib = require('/lib/http-client');
-var util = require('/lib/util');
-var encoding = require('/lib/text-encoding');
-var toolsLib = require('/lib/tools');
+var httpLib = require("/lib/http-client");
+var util = require("/lib/util");
+var encoding = require("/lib/text-encoding");
+var toolsLib = require("/lib/tools");
+var contentLib = require("/lib/xp/content");
 
 var logf = util.log;
 var request = httpLib.request;
 
-exports.sendMessage = function (message) {
-
-    let response = sendRequest(message);
+exports.sendMessage = function (message, siteId) {
+    let response = sendRequest(message, siteId);
     //TODO check response before returning it 401, 400, 500?
     if (response) {
         return response;
@@ -17,16 +17,18 @@ exports.sendMessage = function (message) {
     return "Error, could not send twitter message";
 };
 
-function sendRequest(message) {
+function sendRequest(message, siteId) {
     let status = message;
-    let oath = createOAuthObject();
+    let siteConfig = contentLib.getSiteConfig({
+        key: siteId,
+        applicationKey: app.name,
+    });
+    let oath = createOAuthObject(siteConfig.twitter);
 
     let encodedOath = encodeData(oath);
 
     //Include all body and query string parameters
-    let extraData = [
-        ["status", status],
-    ];
+    let extraData = [["status", status]];
 
     let encodedExtraData = encodeData(extraData);
     let encodedFinal = encodedOath.concat(encodedExtraData);
@@ -36,13 +38,17 @@ function sendRequest(message) {
         method: "POST",
         headers: {},
         params: {
-            status: status
+            status: status,
         },
-        contentType: "application/json"
+        contentType: "application/json",
     };
 
-    let signature = createSignature(encodedFinal, headerData);
-    let storedSign = [['oauth_signature', signature]];
+    let signature = createSignature(
+        encodedFinal,
+        headerData,
+        siteConfig.twitter
+    );
+    let storedSign = [["oauth_signature", signature]];
 
     let encodedSignature = encodeData(storedSign);
     encodedOath = encodedOath.concat(encodedSignature);
@@ -65,16 +71,16 @@ function sendRequest(message) {
 }
 
 //Initializes all possible oauth values. (signature is created later)
-function createOAuthObject() {
+function createOAuthObject(config) {
     let random_token = toolsLib.genRandomString(42);
     let timestamp = Math.floor(new Date().getTime() / 1000);
 
     let oath = [
-        ["oauth_consumer_key", app.config["twitter.consumer_key"]],
+        ["oauth_consumer_key", config.consumer_key],
         ["oauth_nonce", random_token],
         ["oauth_signature_method", "HMAC-SHA1"],
         ["oauth_timestamp", timestamp],
-        ["oauth_token", app.config["twitter.user_token"]],
+        ["oauth_token", config.user_token],
         ["oauth_version", "1.0"],
     ];
 
@@ -83,7 +89,7 @@ function createOAuthObject() {
 
 /**
  * Encodes an double array with [key value]
- * @param {Object} oath 
+ * @param {Object} oath
  */
 function encodeData(oath) {
     let encodedParams = [];
@@ -100,11 +106,11 @@ function encodeData(oath) {
 }
 
 /**
- * Creates the signing signature for the oauth1.0 
- * @param {Object} oath 
- * @param {Object} header 
+ * Creates the signing signature for the oauth1.0
+ * @param {Object} oath
+ * @param {Object} header
  */
-function createSignature(encodedParams, header) {
+function createSignature(encodedParams, header, config) {
     let output = "";
     let param = "";
 
@@ -114,18 +120,18 @@ function createSignature(encodedParams, header) {
     let paramLength = encodedParams.length;
     for (let i = 0; i < paramLength; i++) {
         let pair = encodedParams[i];
-        param += pair[0] + '=' + pair[1];
+        param += pair[0] + "=" + pair[1];
         if (i != paramLength - 1) {
-            param += '&';
+            param += "&";
         }
     }
 
     let method = header.method.toUpperCase();
-    output = method + '&' + strictEncodeUri(header.url);
-    output += '&' + strictEncodeUri(param);
+    output = method + "&" + strictEncodeUri(header.url);
+    output += "&" + strictEncodeUri(param);
 
-    let signingkey = strictEncodeUri(app.config["twitter.consumer_secret"]);
-    signingkey += '&' + strictEncodeUri(app.config["twitter.user_secret"]);
+    let signingkey = strictEncodeUri(config.consumer_secret);
+    signingkey += "&" + strictEncodeUri(config.user_secret);
 
     output = signing(signingkey, output);
 
@@ -135,18 +141,18 @@ function createSignature(encodedParams, header) {
 /**
  * Create the authorization header
  * Params is a double array with (key value) pair
- * @param {Array} params 
+ * @param {Array} params
  */
 function buildAuthorization(params) {
-    let output = 'OAuth ';
+    let output = "OAuth ";
 
     let size = params.length;
     for (let i = 0; i < size; i++) {
         let pair = params[i];
-        output += pair[0] + '=';
+        output += pair[0] + "=";
         output += '"' + pair[1] + '"';
         if (i != size - 1) {
-            output += ', ';
+            output += ", ";
         }
     }
 
@@ -156,8 +162,8 @@ function buildAuthorization(params) {
 /**
  * Uses the key to sign a payloud.
  * Uses hmacsha1 to convert it to hex, and return the base 64 value.
- * @param {String} key 
- * @param {String} payload 
+ * @param {String} key
+ * @param {String} payload
  */
 function signing(key, payload) {
     let hexKey = encoding.hexEncode(key);
@@ -172,11 +178,10 @@ function strictEncodeUri(str) {
         str = str.toString();
     }
     let encodedStr = encodeURIComponent(str);
-    //Need to be more strict to adhere to RFC 3986 
+    //Need to be more strict to adhere to RFC 3986
     let strictUri = encodedStr.replace(/[!'()*]/g, function (c) {
-        return '%' + c.charCodeAt(0).toString(16);
+        return "%" + c.charCodeAt(0).toString(16);
     });
 
     return strictUri;
 }
-

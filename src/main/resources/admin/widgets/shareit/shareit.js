@@ -64,22 +64,25 @@ exports.get = function (req) {
 
         //platforms
         twitter: {
-            enable: false,
+            enable: isTwitterEnabled(siteConfig),
             logoUrl: portal.assetUrl({ path: "images/TwitterWhite.svg" }),
         },
         linkedin: {
             enable: isLinkedinEnabled(siteConfig),
             logoUrl: portal.assetUrl({ path: "images/Linkedin.png" }),
             showAuthorization: linkedinLib.isAuthenticated(site._name),
-            authorizationUrl: linkedinLib.createAuthenticationUrl(site._id),
+            authorizationUrl: linkedinLib.createAuthenticationUrl(
+                site._id,
+                siteConfig
+            ),
         },
         facebook: {
             enable: isFacebookEnabled(siteConfig),
             logoUrl: portal.assetUrl({ path: "images/f_logo.png" }),
             showAuthorization: facebookLib.isAuthenticated(site._name),
             authorizationUrl: facebookLib.createAuthenticationUrl(
-                siteConfig,
-                site._id
+                site._id,
+                siteConfig
             ),
         },
 
@@ -120,6 +123,17 @@ function isLinkedinEnabled(siteConfig) {
 
 // TODO check twitter settings
 function isTwitterEnabled(siteConfig) {
+    if (siteConfig.hasOwnProperty("twitter")) {
+        let settings = siteConfig.twitter;
+        if (
+            settings.consumer_key &&
+            settings.consumer_secret &&
+            settings.user_token &&
+            settings.user_secret
+        ) {
+            return true;
+        }
+    }
     return false;
 }
 

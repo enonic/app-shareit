@@ -238,11 +238,20 @@ exports.sendMessage = function (message, siteName) {
  * @param Siteid id to the current side the user is under.
  * @returns {String} url link
  */
-exports.createAuthenticationUrl = function (siteId) {
+exports.createAuthenticationUrl = function (siteId, siteConfig) {
     let authService = portal.serviceUrl({
         service: "linkedin-authorize",
         type: "absolute",
     });
+
+    // TODO setup domain / admin url to auth service.
+    //authService.replace("")
+
+    let pageId = siteConfig ? siteConfig.pageId : "";
+
+    if (pageId == "" || pageId == undefined) {
+        return null;
+    }
 
     let redirect = encodeURIComponent(authService);
     let randomString = toolsLib.genRandomString(30);
@@ -262,7 +271,7 @@ exports.createAuthenticationUrl = function (siteId) {
         "https://www.linkedin.com/oauth/v2/authorization",
         [
             { key: "response_type", value: "code" },
-            { key: "client_id", value: app.config["linkedin.client_id"] },
+            { key: "client_id", value: siteConfig.linkedin.app_id },
             { key: "redirect_uri", value: redirect },
             { key: "state", value: state },
             { key: "scope", value: scope },

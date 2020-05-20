@@ -245,7 +245,7 @@ exports.postPageMessage = function (message, siteName) {
 };
 
 // The url that the user needs to login and approve
-exports.createAuthenticationUrl = function (siteConfig, siteId) {
+exports.createAuthenticationUrl = function (siteId, siteConfig) {
     let authService = portal.serviceUrl({
         service: "facebook-authorize",
         type: "absolute",
@@ -253,7 +253,7 @@ exports.createAuthenticationUrl = function (siteConfig, siteId) {
 
     let pageId = siteConfig ? siteConfig.pageId : "";
 
-    if (!pageId) {
+    if (pageId == "" || pageId == undefined) {
         return null;
     }
 
@@ -266,11 +266,13 @@ exports.createAuthenticationUrl = function (siteConfig, siteId) {
         siteId: siteId,
     });
 
+    logf(siteConfig);
+
     let authpage = toolsLib.createUrl(
         "https://www.facebook.com/v6.0/dialog/oauth",
         [
             { key: "response_type", value: "code" },
-            { key: "client_id", value: app.config["facebook.client_id"] },
+            { key: "client_id", value: siteConfig.facebook.app_id },
             { key: "redirect_uri", value: redirect },
             { key: "state", value: states },
             { key: "scope", value: scope },

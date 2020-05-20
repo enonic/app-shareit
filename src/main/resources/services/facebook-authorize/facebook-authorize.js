@@ -25,7 +25,7 @@ exports.get = function (req) {
         return notAuthorized("Invalid state or state not found facebook");
     }
 
-    if (!pageId) {
+    if (!siteId) {
         return notAuthorized("Missing pageId from state param");
     }
 
