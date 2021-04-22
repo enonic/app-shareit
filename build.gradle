@@ -37,7 +37,7 @@ dependencies {
 
 //logging.captureStandardOutput LogLevel.INFO || Does not set loglevel of node console.log 
 //Creates a main.css file and removes main.scss from build
-task npmLess(type: NodeTask) {
+task npmLess(type: NodeTask, dependsOn: npmInstall) {
   script = file('npm/create-less.js')
 }
 
