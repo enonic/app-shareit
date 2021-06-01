@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "An XP app for handling sosial media",
   "dependencies": {
-    "jshint": "^2.12.0",
+    "jshint": "^2.13.0",
     "npm": "^7.15.1"
   },
   "scripts": {
