@@ -4,7 +4,7 @@
   "description": "An XP app for handling sosial media",
   "dependencies": {
     "jshint": "^2.12.0",
-    "npm": "^7.11.2"
+    "npm": "^7.15.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
