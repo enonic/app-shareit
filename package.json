@@ -28,7 +28,7 @@
   "devDependencies": {
     "enonic-admin-artifacts": "^1.8.1",
     "less": "^4.1.1",
-    "webpack": "^5.54.0",
+    "webpack": "^5.56.1",
     "webpack-cli": "^4.8.0"
   }
 }
