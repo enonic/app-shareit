@@ -23,7 +23,7 @@ dependencies {
     include "com.enonic.xp:lib-context:${xpVersion}"
     
     include 'com.enonic.lib:lib-cache:2.1.1'
-    include "com.enonic.lib:lib-http-client:3.0.0"
+    include "com.enonic.lib:lib-http-client:3.1.0"
     include 'com.enonic.lib:lib-text-encoding:2.0.0'
     include "com.enonic.lib:lib-thymeleaf:2.0.0"
     include 'com.enonic.lib:lib-util:2.0.0'
